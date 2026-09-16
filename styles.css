@@ -884,12 +884,6 @@ main,
   left: 130%;
 }
 
-.portrait-caption {
-  margin-top: 1rem;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
 .scroll-cue {
   position: absolute;
   left: 50%;
