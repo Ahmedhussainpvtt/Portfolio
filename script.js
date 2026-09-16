@@ -172,9 +172,9 @@ document.querySelector(".logo")?.addEventListener("click", (event) => {
 /* Stretchy pull for CTAs: the button follows the cursor and elongates toward it,
    then snaps home once pulled past BREAK. Back-to-top stays a normal button. */
 if (finePointer && !reducedMotion) {
-  const CATCH = 160;
-  const BREAK = 280;
-  const PULL_RATIO = 0.72;
+  const CATCH = 90;
+  const BREAK = 130;
+  const PULL_RATIO = 0.45;
 
   const buttons = [...document.querySelectorAll(".btn, .nav-cta")];
   const active = new Map();
@@ -325,8 +325,8 @@ if (finePointer && !reducedMotion) {
     entry.target.x = (dx / dist) * reach;
     entry.target.y = (dy / dist) * reach;
     // elongate toward the cursor, squash on the cross-axis
-    entry.target.sx = 1 + t * 0.42;
-    entry.target.sy = 1 - t * 0.2;
+    entry.target.sx = 1 + t * 0.22;
+    entry.target.sy = 1 - t * 0.1;
     startLoop();
   };
 
