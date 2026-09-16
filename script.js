@@ -890,49 +890,85 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   };
 
   const drawTrail = () => {
-    // A smoothed follower feeds the trail, so the tail keeps its shape between
-    // pointer events and eases back into the cursor when the mouse stops.
+    // Follow the pointer, then densify samples so fast moves never leave gaps
+    // that read as a string of dots.
     if (pointer.active && follow.ready) {
-      follow.x += (pointer.x - follow.x) * 0.17;
-      follow.y += (pointer.y - follow.y) * 0.17;
-      trail.push({ x: follow.x, y: follow.y });
-      while (trail.length > 26) trail.shift();
+      follow.x += (pointer.x - follow.x) * 0.32;
+      follow.y += (pointer.y - follow.y) * 0.32;
+
+      const last = trail[trail.length - 1];
+      if (!last) {
+        trail.push({ x: follow.x, y: follow.y });
+      } else {
+        const dx = follow.x - last.x;
+        const dy = follow.y - last.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 0.8) {
+          const steps = Math.max(1, Math.ceil(dist / 2.5));
+          for (let s = 1; s <= steps; s += 1) {
+            trail.push({
+              x: last.x + (dx * s) / steps,
+              y: last.y + (dy * s) / steps,
+            });
+          }
+        }
+      }
+
+      while (trail.length > 56) trail.shift();
     } else if (trail.length) {
-      trail.shift();
+      trail.splice(0, Math.max(1, Math.ceil(trail.length * 0.1)));
     }
 
-    for (let i = 1; i < trail.length; i += 1) {
-      const t = i / trail.length;
-      const r = Math.round(
-        accents.tealRgb[0] + (accents.amberRgb[0] - accents.tealRgb[0]) * t
-      );
-      const g = Math.round(
-        accents.tealRgb[1] + (accents.amberRgb[1] - accents.tealRgb[1]) * t
-      );
-      const b = Math.round(
-        accents.tealRgb[2] + (accents.amberRgb[2] - accents.tealRgb[2]) * t
-      );
+    if (trail.length < 2) return;
+
+    const [tr, tg, tb] = accents.tealRgb;
+    const [ar, ag, ab] = accents.amberRgb;
+
+    const strokeSmooth = (width, alpha, color) => {
       fxCtx.beginPath();
-      fxCtx.moveTo(trail[i - 1].x, trail[i - 1].y);
-      fxCtx.lineTo(trail[i].x, trail[i].y);
-      fxCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${t * 0.55})`;
-      fxCtx.lineWidth = t * 7;
+      fxCtx.moveTo(trail[0].x, trail[0].y);
+
+      if (trail.length === 2) {
+        fxCtx.lineTo(trail[1].x, trail[1].y);
+      } else {
+        for (let i = 1; i < trail.length - 1; i += 1) {
+          const xc = (trail[i].x + trail[i + 1].x) * 0.5;
+          const yc = (trail[i].y + trail[i + 1].y) * 0.5;
+          fxCtx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc);
+        }
+        const last = trail[trail.length - 1];
+        fxCtx.lineTo(last.x, last.y);
+      }
+
+      fxCtx.strokeStyle = `rgba(${color}, ${alpha})`;
+      fxCtx.lineWidth = width;
       fxCtx.lineCap = "round";
       fxCtx.lineJoin = "round";
       fxCtx.stroke();
-    }
+    };
 
-    const head = trail[trail.length - 1];
-    if (head && pointer.active && trail.length > 1) {
-      fxCtx.save();
-      fxCtx.shadowColor = `rgba(${accents.amberRgb.join(",")}, 0.85)`;
-      fxCtx.shadowBlur = 12;
+    fxCtx.save();
+    // soft underglow → mid ribbon → bright core, one continuous path each
+    strokeSmooth(16, 0.07, `${tr}, ${tg}, ${tb}`);
+    strokeSmooth(9, 0.14, `${tr}, ${tg}, ${tb}`);
+    strokeSmooth(4.2, 0.38, `${Math.round((tr + ar) / 2)}, ${Math.round(
+      (tg + ag) / 2
+    )}, ${Math.round((tb + ab) / 2)}`);
+    strokeSmooth(2, 0.7, `${ar}, ${ag}, ${ab}`);
+
+    // soft tip glow, no hard circle so it doesn't read as a bead
+    const tip = trail[trail.length - 1];
+    if (pointer.active) {
+      const glow = fxCtx.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 14);
+      glow.addColorStop(0, `rgba(${ar}, ${ag}, ${ab}, 0.55)`);
+      glow.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 0)`);
+      fxCtx.fillStyle = glow;
       fxCtx.beginPath();
-      fxCtx.arc(head.x, head.y, 4, 0, Math.PI * 2);
-      fxCtx.fillStyle = `rgba(${accents.amberRgb.join(",")}, 0.9)`;
+      fxCtx.arc(tip.x, tip.y, 14, 0, Math.PI * 2);
       fxCtx.fill();
-      fxCtx.restore();
     }
+    fxCtx.restore();
   };
 
   const drawSparks = () => {
