@@ -1,3 +1,12 @@
+/* =======================================================================
+   SETTINGS
+
+   OPEN_TO_WORK: set to true when you are job hunting. It shows the
+   "Open to new opportunities" badge above your name in the hero.
+   Set it back to false to hide the badge again.
+   ======================================================================= */
+const OPEN_TO_WORK = false;
+
 const header = document.querySelector(".site-header");
 const toggle = document.querySelector(".nav-toggle");
 const nav = document.querySelector(".site-nav");
@@ -10,6 +19,7 @@ const backToTopFooter = document.getElementById("back-to-top-footer");
 const scrollBar = document.getElementById("scroll-bar");
 const cursorGlow = document.getElementById("cursor-glow");
 const rotator = document.getElementById("rotator");
+const availabilityBadge = document.getElementById("availability-badge");
 
 const CONTACT_EMAIL = "mahhussain123@gmail.com";
 
@@ -17,6 +27,10 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matc
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
 year.textContent = new Date().getFullYear();
+
+if (availabilityBadge) {
+  availabilityBadge.hidden = !OPEN_TO_WORK;
+}
 
 /* ---------- scroll driven UI ---------- */
 
