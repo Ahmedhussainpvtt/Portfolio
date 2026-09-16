@@ -768,8 +768,10 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   let particles = [];
   let sparks = [];
   const trail = [];
-  const pointer = { x: 0, y: 0, active: false };
+  const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0 };
   const follow = { x: 0, y: 0, ready: false };
+  let lastSampleX = 0;
+  let lastSampleY = 0;
 
   const resize = () => {
     width = window.innerWidth;
@@ -801,14 +803,26 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     window.addEventListener(
       "pointermove",
       (event) => {
+        const dx = event.clientX - pointer.x;
+        const dy = event.clientY - pointer.y;
+        const moved = Math.hypot(dx, dy);
+
         pointer.x = event.clientX;
         pointer.y = event.clientY;
         pointer.active = true;
+
+        // ignore micro jitter so a resting cursor does not keep a tail alive
+        if (moved > 0.6) {
+          pointer.moving = true;
+          pointer.lastMove = performance.now();
+        }
 
         if (!follow.ready) {
           follow.x = pointer.x;
           follow.y = pointer.y;
           follow.ready = true;
+          lastSampleX = pointer.x;
+          lastSampleY = pointer.y;
         }
       },
       { passive: true }
@@ -816,6 +830,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
 
     document.addEventListener("pointerleave", () => {
       pointer.active = false;
+      pointer.moving = false;
     });
   }
 
@@ -890,34 +905,42 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   };
 
   const drawTrail = () => {
-    // Follow the pointer, then densify samples so fast moves never leave gaps
-    // that read as a string of dots.
-    if (pointer.active && follow.ready) {
-      follow.x += (pointer.x - follow.x) * 0.32;
-      follow.y += (pointer.y - follow.y) * 0.32;
+    // tail only while the cursor is actually moving; resting = glow circle only
+    if (pointer.moving && performance.now() - pointer.lastMove > 48) {
+      pointer.moving = false;
+    }
 
-      const last = trail[trail.length - 1];
-      if (!last) {
-        trail.push({ x: follow.x, y: follow.y });
-      } else {
-        const dx = follow.x - last.x;
-        const dy = follow.y - last.y;
-        const dist = Math.hypot(dx, dy);
+    follow.x += (pointer.x - follow.x) * 0.32;
+    follow.y += (pointer.y - follow.y) * 0.32;
 
-        if (dist > 0.8) {
-          const steps = Math.max(1, Math.ceil(dist / 2.5));
-          for (let s = 1; s <= steps; s += 1) {
-            trail.push({
-              x: last.x + (dx * s) / steps,
-              y: last.y + (dy * s) / steps,
-            });
-          }
+    if (pointer.active && follow.ready && pointer.moving) {
+      const dx = follow.x - lastSampleX;
+      const dy = follow.y - lastSampleY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 0.8) {
+        const steps = Math.max(1, Math.ceil(dist / 2.5));
+        for (let s = 1; s <= steps; s += 1) {
+          trail.push({
+            x: lastSampleX + (dx * s) / steps,
+            y: lastSampleY + (dy * s) / steps,
+          });
         }
+        lastSampleX = follow.x;
+        lastSampleY = follow.y;
       }
 
       while (trail.length > 56) trail.shift();
     } else if (trail.length) {
-      trail.splice(0, Math.max(1, Math.ceil(trail.length * 0.1)));
+      // collapse fast once motion stops so it does not linger behind the cursor
+      trail.splice(0, Math.max(3, Math.ceil(trail.length * 0.28)));
+      if (!trail.length) {
+        lastSampleX = follow.x;
+        lastSampleY = follow.y;
+      }
+    } else {
+      lastSampleX = follow.x;
+      lastSampleY = follow.y;
     }
 
     if (trail.length < 2) return;
@@ -949,7 +972,6 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     };
 
     fxCtx.save();
-    // soft underglow → mid ribbon → bright core, one continuous path each
     strokeSmooth(16, 0.07, `${tr}, ${tg}, ${tb}`);
     strokeSmooth(9, 0.14, `${tr}, ${tg}, ${tb}`);
     strokeSmooth(4.2, 0.38, `${Math.round((tr + ar) / 2)}, ${Math.round(
@@ -957,9 +979,8 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     )}, ${Math.round((tb + ab) / 2)}`);
     strokeSmooth(2, 0.7, `${ar}, ${ag}, ${ab}`);
 
-    // soft tip glow, no hard circle so it doesn't read as a bead
-    const tip = trail[trail.length - 1];
-    if (pointer.active) {
+    if (pointer.moving) {
+      const tip = trail[trail.length - 1];
       const glow = fxCtx.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 14);
       glow.addColorStop(0, `rgba(${ar}, ${ag}, ${ab}, 0.55)`);
       glow.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 0)`);
