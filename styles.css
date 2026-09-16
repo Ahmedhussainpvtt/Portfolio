@@ -90,7 +90,72 @@ ol {
   top: 1rem;
 }
 
+/* ---------- intro curtain ---------- */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  pointer-events: none;
+  animation: intro-out 0.7s var(--ease) 0.5s forwards;
+}
+
+.intro-mark {
+  display: block;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(20, 34, 28, 0.18);
+  animation: intro-mark 1.15s var(--ease) both;
+}
+
+.intro-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes intro-mark {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
 /* ---------- ambient background ---------- */
+
+.fx-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fx-back {
+  z-index: -1;
+}
+
+.fx-front {
+  z-index: 55;
+}
 
 .aurora {
   position: fixed;
@@ -365,6 +430,12 @@ main,
 
 /* ---------- buttons ---------- */
 
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .btn {
   position: relative;
   isolation: isolate;
@@ -383,10 +454,60 @@ main,
     color 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
 }
 
-.btn > span,
+.btn > span:not(.ripple),
 .btn > svg {
   position: relative;
   z-index: 2;
+}
+
+/* rotating shine that traces the button edge on hover */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1.6px;
+  opacity: 0;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    rgba(255, 255, 255, 0.95) 14%,
+    transparent 30%,
+    transparent 64%,
+    rgba(215, 196, 163, 0.95) 80%,
+    transparent 96%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: opacity 0.35s ease;
+}
+
+.btn:hover::before,
+.btn:focus-visible::before {
+  opacity: 1;
+  animation: border-spin 2.4s linear infinite;
+}
+
+.btn-ghost::before {
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    rgba(47, 93, 74, 0.95) 14%,
+    transparent 30%,
+    transparent 64%,
+    rgba(184, 149, 106, 0.95) 80%,
+    transparent 96%
+  );
+}
+
+@keyframes border-spin {
+  to {
+    --angle: 360deg;
+  }
 }
 
 .btn svg {
@@ -795,9 +916,10 @@ main,
 /* ---------- marquee ---------- */
 
 .marquee {
-  margin-top: 0;
-  padding: 0.9rem 0;
+  margin-top: 3rem;
+  padding: 1.05rem 0;
   overflow: hidden;
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   -webkit-mask-image: linear-gradient(
     90deg,
@@ -845,6 +967,21 @@ main,
   margin: 0 auto;
   padding: 6.5rem 0 0;
   scroll-margin-top: 88px;
+}
+
+.section-heading .eyebrow::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 1px;
+  margin-left: 0.7rem;
+  vertical-align: middle;
+  background: linear-gradient(90deg, var(--forest), transparent);
+  transition: width 0.9s var(--ease) 0.25s;
+}
+
+.section-heading .eyebrow.is-visible::after {
+  width: 64px;
 }
 
 .section-heading h2 {
@@ -944,6 +1081,11 @@ main,
 
 .timeline > li.is-visible::after {
   transform: scale(1);
+}
+
+.timeline > li:hover::after {
+  background: var(--gold);
+  box-shadow: 0 0 0 8px rgba(184, 149, 106, 0.16);
 }
 
 .when {
@@ -1497,12 +1639,81 @@ main,
   margin-top: 0.4rem;
 }
 
+.submit-btn {
+  min-width: 190px;
+  justify-content: center;
+}
+
+.btn-spinner,
+.btn-check {
+  display: none;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(243, 238, 228, 0.35);
+  border-top-color: var(--bg);
+  animation: spin 0.7s linear infinite;
+}
+
+.submit-btn.is-loading .btn-spinner {
+  display: block;
+}
+
+.btn-check {
+  width: 18px;
+  height: 18px;
+}
+
+.submit-btn.is-sent {
+  background: #2f7f5c;
+  animation: pop 0.5s var(--ease);
+}
+
+.submit-btn.is-sent .btn-check {
+  display: block;
+}
+
+.submit-btn.is-sent .btn-check path {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: draw-check 0.5s var(--ease) 0.1s forwards;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pop {
+  40% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 .form-status {
   grid-column: 1 / -1;
   margin: 0.2rem 0 0;
   min-height: 1.4em;
   font-size: 0.95rem;
   color: rgba(243, 238, 228, 0.72);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.form-status.is-shown {
+  opacity: 1;
+  transform: none;
 }
 
 .form-status.is-success {
@@ -1626,7 +1837,8 @@ html.js [data-reveal="mask"].is-visible {
 }
 
 html.js [data-tilt].is-visible {
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform: perspective(900px) translate3d(0, var(--pty, 0px), 0)
+    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform 0.4s var(--ease), opacity 0.75s var(--ease),
     box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
 }
@@ -1837,7 +2049,17 @@ html.js [data-tilt].is-visible {
   }
 
   .cursor-glow,
+  .fx-canvas,
   .scroll-cue-dot {
     display: none;
+  }
+
+  .intro {
+    display: none;
+  }
+
+  .form-status {
+    opacity: 1;
+    transform: none;
   }
 }

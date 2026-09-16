@@ -32,6 +32,12 @@
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
+    <div class="intro" aria-hidden="true">
+      <span class="intro-mark">
+        <img src="assets/logo.png" alt="" width="64" height="64" />
+      </span>
+    </div>
+
     <div class="scroll-progress" aria-hidden="true">
       <span id="scroll-bar"></span>
     </div>
@@ -41,8 +47,10 @@
       <span class="blob blob-2"></span>
       <span class="blob blob-3"></span>
     </div>
+    <canvas class="fx-canvas fx-back" id="bg-fx" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+    <canvas class="fx-canvas fx-front" id="cursor-fx" aria-hidden="true"></canvas>
 
     <header class="site-header" id="top">
       <div class="nav-wrap">
@@ -751,12 +759,23 @@
               <textarea name="message" rows="5" required></textarea>
             </label>
             <button
-              class="btn btn-primary"
+              class="btn btn-primary submit-btn"
               type="submit"
               id="contact-submit"
               data-ripple
             >
-              <span>Send message</span>
+              <span class="btn-label">Send message</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <svg class="btn-check" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M5 12.5l4.2 4.2L19 7"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </button>
             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
           </form>

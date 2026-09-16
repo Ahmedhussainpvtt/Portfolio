@@ -266,6 +266,213 @@ if (finePointer && !reducedMotion && cursorGlow) {
   requestAnimationFrame(followCursor);
 }
 
+/* ---------- canvas effects: drifting field, cursor trail, celebration ---------- */
+
+let burstAt = () => {};
+
+const bgCanvas = document.getElementById("bg-fx");
+const fxCanvas = document.getElementById("cursor-fx");
+
+if (bgCanvas && fxCanvas && !reducedMotion) {
+  const bgCtx = bgCanvas.getContext("2d");
+  const fxCtx = fxCanvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  let width = 0;
+  let height = 0;
+  let particles = [];
+  let sparks = [];
+  const trail = [];
+  const pointer = { x: 0, y: 0, active: false };
+  const follow = { x: 0, y: 0, ready: false };
+
+  const resize = () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    [bgCanvas, fxCanvas].forEach((canvas) => {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+
+    const count = width < 760 ? 0 : Math.min(58, Math.round(width / 26));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.16,
+      vy: (Math.random() - 0.5) * 0.16,
+      r: Math.random() * 1.6 + 0.6,
+      a: Math.random() * 0.26 + 0.1,
+    }));
+  };
+
+  resize();
+  window.addEventListener("resize", resize);
+
+  if (finePointer) {
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        pointer.x = event.clientX;
+        pointer.y = event.clientY;
+        pointer.active = true;
+
+        if (!follow.ready) {
+          follow.x = pointer.x;
+          follow.y = pointer.y;
+          follow.ready = true;
+        }
+      },
+      { passive: true }
+    );
+
+    document.addEventListener("pointerleave", () => {
+      pointer.active = false;
+    });
+  }
+
+  burstAt = (x, y) => {
+    const colors = ["#2f5d4a", "#b8956a", "#3f9e6f", "#d7c4a3"];
+    for (let i = 0; i < 46; i += 1) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 5.5 + 1.8;
+      sparks.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2.2,
+        life: 1,
+        size: Math.random() * 3.4 + 1.6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+  };
+
+  const drawField = () => {
+    bgCtx.clearRect(0, 0, width, height);
+
+    particles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -20) p.x = width + 20;
+      if (p.x > width + 20) p.x = -20;
+      if (p.y < -20) p.y = height + 20;
+      if (p.y > height + 20) p.y = -20;
+
+      bgCtx.beginPath();
+      bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(47, 93, 74, ${p.a})`;
+      bgCtx.fill();
+    });
+
+    for (let i = 0; i < particles.length; i += 1) {
+      for (let j = i + 1; j < particles.length; j += 1) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 130) continue;
+
+        bgCtx.beginPath();
+        bgCtx.moveTo(particles[i].x, particles[i].y);
+        bgCtx.lineTo(particles[j].x, particles[j].y);
+        bgCtx.strokeStyle = `rgba(47, 93, 74, ${(1 - dist / 130) * 0.09})`;
+        bgCtx.lineWidth = 1;
+        bgCtx.stroke();
+      }
+    }
+  };
+
+  const drawTrail = () => {
+    // A smoothed follower feeds the trail, so the tail keeps its shape between
+    // pointer events and eases back into the cursor when the mouse stops.
+    if (pointer.active && follow.ready) {
+      follow.x += (pointer.x - follow.x) * 0.17;
+      follow.y += (pointer.y - follow.y) * 0.17;
+      trail.push({ x: follow.x, y: follow.y });
+      while (trail.length > 26) trail.shift();
+    } else if (trail.length) {
+      trail.shift();
+    }
+
+    for (let i = 1; i < trail.length; i += 1) {
+      const t = i / trail.length;
+      fxCtx.beginPath();
+      fxCtx.moveTo(trail[i - 1].x, trail[i - 1].y);
+      fxCtx.lineTo(trail[i].x, trail[i].y);
+      fxCtx.strokeStyle = `rgba(${Math.round(47 + t * 120)}, ${Math.round(
+        93 + t * 50
+      )}, ${Math.round(74 + t * 30)}, ${t * 0.55})`;
+      fxCtx.lineWidth = t * 7;
+      fxCtx.lineCap = "round";
+      fxCtx.lineJoin = "round";
+      fxCtx.stroke();
+    }
+
+    const head = trail[trail.length - 1];
+    if (head && pointer.active && trail.length > 1) {
+      fxCtx.save();
+      fxCtx.shadowColor = "rgba(184, 149, 106, 0.85)";
+      fxCtx.shadowBlur = 12;
+      fxCtx.beginPath();
+      fxCtx.arc(head.x, head.y, 4, 0, Math.PI * 2);
+      fxCtx.fillStyle = "rgba(184, 149, 106, 0.9)";
+      fxCtx.fill();
+      fxCtx.restore();
+    }
+  };
+
+  const drawSparks = () => {
+    sparks = sparks.filter((s) => s.life > 0.02);
+
+    sparks.forEach((s) => {
+      s.vy += 0.14;
+      s.vx *= 0.99;
+      s.x += s.vx;
+      s.y += s.vy;
+      s.life -= 0.014;
+
+      fxCtx.globalAlpha = Math.max(s.life, 0);
+      fxCtx.fillStyle = s.color;
+      fxCtx.beginPath();
+      fxCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      fxCtx.fill();
+      fxCtx.globalAlpha = 1;
+    });
+  };
+
+  const render = () => {
+    if (!document.hidden) {
+      drawField();
+      fxCtx.clearRect(0, 0, width, height);
+      if (finePointer) drawTrail();
+      drawSparks();
+    }
+    requestAnimationFrame(render);
+  };
+
+  requestAnimationFrame(render);
+}
+
+/* ---------- hero parallax ---------- */
+
+const heroPortrait = document.querySelector(".hero-portrait");
+
+if (heroPortrait && finePointer && !reducedMotion) {
+  const parallax = () => {
+    const shift = Math.max(Math.min(window.scrollY * 0.06, 22), -22);
+    heroPortrait.style.setProperty("--pty", `${-shift}px`);
+  };
+
+  parallax();
+  window.addEventListener("scroll", () => requestAnimationFrame(parallax), {
+    passive: true,
+  });
+}
+
 /* ---------- rotating role ---------- */
 
 if (rotator && !reducedMotion) {
@@ -291,9 +498,32 @@ if (rotator && !reducedMotion) {
 
 /* ---------- contact form ---------- */
 
+const btnLabel = submitBtn.querySelector(".btn-label");
+
 const setStatus = (message, type = "") => {
   statusEl.textContent = message;
-  statusEl.className = `form-status${type ? ` is-${type}` : ""}`;
+  statusEl.className = `form-status${type ? ` is-${type}` : ""}${
+    message ? " is-shown" : ""
+  }`;
+};
+
+const setButtonState = (state) => {
+  submitBtn.classList.remove("is-loading", "is-sent");
+
+  if (state === "loading") {
+    submitBtn.classList.add("is-loading");
+    btnLabel.textContent = "Sending";
+  } else if (state === "sent") {
+    submitBtn.classList.add("is-sent");
+    btnLabel.textContent = "Message sent";
+  } else {
+    btnLabel.textContent = "Send message";
+  }
+};
+
+const celebrate = () => {
+  const rect = submitBtn.getBoundingClientRect();
+  burstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
 };
 
 form.addEventListener("submit", async (event) => {
@@ -310,6 +540,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   submitBtn.disabled = true;
+  setButtonState("loading");
   setStatus("Sending your message...", "");
 
   try {
@@ -334,11 +565,15 @@ form.addEventListener("submit", async (event) => {
     }
 
     form.reset();
+    setButtonState("sent");
+    celebrate();
     setStatus(
       "Message sent. Thanks for reaching out. I will get back to you soon.",
       "success"
     );
+    setTimeout(() => setButtonState("idle"), 3200);
   } catch (error) {
+    setButtonState("idle");
     const subject = encodeURIComponent(`Portfolio inquiry from ${name}`);
     const body = encodeURIComponent(`${message}\n\n-\n${name}\n${email}`);
     const mailto = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
