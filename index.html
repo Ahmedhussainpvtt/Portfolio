@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +8,18 @@
       name="description"
       content="Mohammed Ahmed Hussain is a Sales and Operations professional with 5+ years of experience in sales leadership, product management, AI solutions, and talent acquisition."
     />
+    <meta name="theme-color" content="#f3eee4" />
+    <meta property="og:title" content="Mohammed Ahmed Hussain | Sales &amp; Operations" />
+    <meta
+      property="og:description"
+      content="Sales and operations professional blending AI, automation, and practical problem solving."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/ahmed-hussain.png" />
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,7 +31,18 @@
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="scroll-progress" aria-hidden="true">
+      <span id="scroll-bar"></span>
+    </div>
+
+    <div class="aurora" aria-hidden="true">
+      <span class="blob blob-1"></span>
+      <span class="blob blob-2"></span>
+      <span class="blob blob-3"></span>
+    </div>
     <div class="grain" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
     <header class="site-header" id="top">
       <div class="nav-wrap">
@@ -38,34 +61,50 @@
           <a href="#approach">Approach</a>
           <a href="#expertise">Skills</a>
           <a href="#explore">Explore</a>
-          <a class="nav-cta" href="#contact">Contact Me</a>
+          <a class="nav-cta" href="#contact" data-magnetic>
+            <span>Contact Me</span>
+          </a>
         </nav>
       </div>
     </header>
 
     <main id="main">
       <section class="hero">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">Shaikpet, Hyderabad · Working with global teams</p>
-          <h1>Ahmed<br />Hussain</h1>
-          <p class="role">
-            Product Sales &amp; Operations Manager · ContactSwing AI
+        <div class="hero-copy">
+          <p class="badge" data-reveal>
+            <span class="pulse" aria-hidden="true"></span>
+            Open to new opportunities
           </p>
-          <p class="lede">
+          <p class="eyebrow" data-reveal>
+            Shaikpet, Hyderabad · Working with global teams
+          </p>
+          <h1 class="hero-title">
+            <span class="line"><span data-reveal="mask">Ahmed</span></span>
+            <span class="line"><span data-reveal="mask">Hussain</span></span>
+          </h1>
+          <p class="role" data-reveal>
+            Product Sales &amp; Operations Manager ·
+            <span class="rotator" id="rotator" aria-live="off">ContactSwing AI</span>
+          </p>
+          <p class="lede" data-reveal>
             Sales and operations professional with 5+ years leading revenue
             growth, product delivery, and talent. I work closely with C-level
             executives, VPs, and senior leadership, and I am deeply tech-savvy
             with a love for exploring new tools, AI, and automation.
           </p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#contact">Contact Me</a>
+          <div class="hero-actions" data-reveal>
+            <a class="btn btn-primary" href="#contact" data-magnetic data-ripple>
+              <span>Contact Me</span>
+            </a>
             <a
               class="btn btn-ghost"
               href="https://www.linkedin.com/in/ahmedhussainpvt/"
               target="_blank"
               rel="noopener noreferrer"
+              data-magnetic
+              data-ripple
             >
-              LinkedIn
+              <span>LinkedIn</span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M7 17L17 7M17 7H8M17 7v9"
@@ -77,55 +116,108 @@
                 />
               </svg>
             </a>
-            <a class="btn btn-ghost" href="Ahmed%20Resume.pdf" download>
-              Resume
+            <a
+              class="btn btn-ghost"
+              href="Ahmed%20Resume.pdf"
+              download
+              data-magnetic
+              data-ripple
+            >
+              <span>Resume</span>
             </a>
           </div>
         </div>
 
-        <div class="hero-portrait reveal">
+        <div class="hero-portrait" data-reveal data-tilt>
+          <div class="portrait-glow" aria-hidden="true"></div>
+          <div class="portrait-ring" aria-hidden="true"></div>
           <div class="portrait-frame">
             <img
               src="assets/ahmed-hussain.png"
               alt="Mohammed Ahmed Hussain in a grey suit, standing with arms crossed"
             />
+            <span class="portrait-shine" aria-hidden="true"></span>
           </div>
           <p class="portrait-caption">
             Product Sales &amp; Operations Manager · Core Team
           </p>
         </div>
+
+        <a class="scroll-cue" href="#about" aria-label="Scroll to about section">
+          <span class="scroll-cue-track" aria-hidden="true">
+            <span class="scroll-cue-dot"></span>
+          </span>
+          <span class="scroll-cue-text">Scroll</span>
+        </a>
       </section>
 
       <section class="stats" aria-label="Focus areas">
-        <article class="reveal">
+        <article data-reveal data-spotlight>
           <strong>C-level</strong>
           <span>Trusted partner to executives and VPs</span>
         </article>
-        <article class="reveal">
+        <article data-reveal data-spotlight>
           <strong>Sales</strong>
           <span>End-to-end cycles and outbound growth</span>
         </article>
-        <article class="reveal">
+        <article data-reveal data-spotlight>
           <strong>AI</strong>
           <span>Product demos, testing, and go-live support</span>
         </article>
-        <article class="reveal">
+        <article data-reveal data-spotlight>
           <strong>Curious</strong>
           <span>Always exploring new tech and workflows</span>
         </article>
       </section>
 
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span>Product Sales</span>
+          <span>·</span>
+          <span>Operations</span>
+          <span>·</span>
+          <span>AI Voice Agents</span>
+          <span>·</span>
+          <span>Automation</span>
+          <span>·</span>
+          <span>CRM &amp; HubSpot</span>
+          <span>·</span>
+          <span>Customer Success</span>
+          <span>·</span>
+          <span>Team Training</span>
+          <span>·</span>
+          <span>Executive Partnership</span>
+          <span>·</span>
+          <span>Product Sales</span>
+          <span>·</span>
+          <span>Operations</span>
+          <span>·</span>
+          <span>AI Voice Agents</span>
+          <span>·</span>
+          <span>Automation</span>
+          <span>·</span>
+          <span>CRM &amp; HubSpot</span>
+          <span>·</span>
+          <span>Customer Success</span>
+          <span>·</span>
+          <span>Team Training</span>
+          <span>·</span>
+          <span>Executive Partnership</span>
+          <span>·</span>
+        </div>
+      </div>
+
       <section class="section about" id="about">
-        <div class="section-heading reveal">
-          <p class="eyebrow">About</p>
-          <h2>A short note on how I work.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>About</p>
+          <h2 data-reveal>A short note on how I work.</h2>
         </div>
         <div class="about-grid">
-          <blockquote class="reveal">
+          <blockquote data-reveal>
             I'm all about fixing messy work and turning "it's complicated"
             into "it's handled."
           </blockquote>
-          <div class="about-copy reveal">
+          <div class="about-copy" data-reveal>
             <p>
               I'm a results-driven professional who thrives at the crossroads
               of AI, automation, and real-world problem-solving. I'm all about
@@ -166,12 +258,12 @@
       </section>
 
       <section class="section leadership" id="leadership">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Leadership</p>
-          <h2>Comfortable in the room with decision makers.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Leadership</p>
+          <h2 data-reveal>Comfortable in the room with decision makers.</h2>
         </div>
         <div class="leadership-grid">
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>C-level &amp; VP partners</h3>
             <p>
               I have worked very closely with CEOs, CTOs, VPs, and other senior
@@ -179,7 +271,7 @@
               hiring priorities, and operational reporting.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Clear executive communication</h3>
             <p>
               I translate complex workflows, technical constraints, and market
@@ -187,7 +279,7 @@
               without losing the detail that matters.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Cross-functional bridge</h3>
             <p>
               I sit between business and technical teams, aligning sales,
@@ -195,7 +287,7 @@
               and less friction.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Hands-on with strategy</h3>
             <p>
               From outbound playbooks to platform go-lives, I stay close to the
@@ -203,7 +295,7 @@
               management needs to steer the business.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>People training</h3>
             <p>
               I train teammates on sales processes, tools, and day-to-day
@@ -211,7 +303,7 @@
               consistency.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Automation for productivity</h3>
             <p>
               I build practical automations that save time for teams and
@@ -223,15 +315,15 @@
       </section>
 
       <section class="section experience" id="experience">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Experience</p>
-          <h2>Where the work has taken me.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Experience</p>
+          <h2 data-reveal>Where the work has taken me.</h2>
         </div>
 
         <ol class="timeline">
-          <li class="reveal">
+          <li data-reveal>
             <div class="when">
-              <span>Jan 2024 - Present</span>
+              <span class="when-range">Jan 2024 - Present</span>
               <span class="where">Madhapur, Hyderabad</span>
             </div>
             <div class="what">
@@ -294,9 +386,9 @@
             </div>
           </li>
 
-          <li class="reveal">
+          <li data-reveal>
             <div class="when">
-              <span>Aug 2022 - Jan 2024</span>
+              <span class="when-range">Aug 2022 - Jan 2024</span>
               <span class="where">Madhapur, Hyderabad</span>
             </div>
             <div class="what">
@@ -335,9 +427,9 @@
             </div>
           </li>
 
-          <li class="reveal">
+          <li data-reveal>
             <div class="when">
-              <span>Jan 2021 - May 2022</span>
+              <span class="when-range">Jan 2021 - May 2022</span>
               <span class="where">Jubilee Hills, Hyderabad</span>
             </div>
             <div class="what">
@@ -374,40 +466,40 @@
       </section>
 
       <section class="section achievements" id="achievements">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Highlights</p>
-          <h2>How I create impact.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Highlights</p>
+          <h2 data-reveal>How I create impact.</h2>
         </div>
         <div class="achievement-grid">
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Team leadership</h3>
             <p>
               Built and managed sales and recruiting teams that improved
               day-to-day operations and supported consistent growth.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Training &amp; enablement</h3>
             <p>
               Trained people on tools, processes, and outreach systems so teams
               could work faster, stay aligned, and deliver with more confidence.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Business automations</h3>
             <p>
               Created automations that enhance business workflows and help
               teams save time while improving day-to-day productivity.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Executive alignment</h3>
             <p>
               Partnered directly with C-level leaders and VPs to shape strategy,
               pricing, hiring plans, and product direction.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Product &amp; platform QA</h3>
             <p>
               Led testing for AI voice workflows and platform operations so
@@ -418,13 +510,13 @@
       </section>
 
       <section class="section approach" id="approach">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Approach</p>
-          <h2>How I get things done.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Approach</p>
+          <h2 data-reveal>How I get things done.</h2>
         </div>
         <ol class="approach-steps">
-          <li class="reveal">
-            <span>01</span>
+          <li data-reveal data-spotlight>
+            <span class="step-num">01</span>
             <div>
               <h3>Listen and map the mess</h3>
               <p>
@@ -433,8 +525,8 @@
               </p>
             </div>
           </li>
-          <li class="reveal">
-            <span>02</span>
+          <li data-reveal data-spotlight>
+            <span class="step-num">02</span>
             <div>
               <h3>Design something practical</h3>
               <p>
@@ -444,8 +536,8 @@
               </p>
             </div>
           </li>
-          <li class="reveal">
-            <span>03</span>
+          <li data-reveal data-spotlight>
+            <span class="step-num">03</span>
             <div>
               <h3>Align leadership early</h3>
               <p>
@@ -454,8 +546,8 @@
               </p>
             </div>
           </li>
-          <li class="reveal">
-            <span>04</span>
+          <li data-reveal data-spotlight>
+            <span class="step-num">04</span>
             <div>
               <h3>Ship, test, and tighten</h3>
               <p>
@@ -467,13 +559,27 @@
         </ol>
       </section>
 
+      <section class="section pitch" aria-label="Why work with me">
+        <div class="pitch-panel" data-reveal data-spotlight>
+          <h2>Need someone who turns messy operations into momentum?</h2>
+          <p>
+            I bring the sales instinct, the operational discipline, and the
+            technical curiosity to make things actually work. If that sounds
+            like the person your team is missing, let's talk.
+          </p>
+          <a class="btn btn-primary" href="#contact" data-magnetic data-ripple>
+            <span>Let's work together</span>
+          </a>
+        </div>
+      </section>
+
       <section class="section expertise" id="expertise">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Skills</p>
-          <h2>What I bring to the table.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Skills</p>
+          <h2 data-reveal>What I bring to the table.</h2>
         </div>
         <div class="skill-groups">
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Sales &amp; growth</h3>
             <ul>
               <li>End-to-end sales cycle</li>
@@ -484,7 +590,7 @@
               <li>SEO &amp; email marketing</li>
             </ul>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Ops &amp; platforms</h3>
             <ul>
               <li>AI voice workflows</li>
@@ -495,7 +601,7 @@
               <li>Webflow &amp; WordPress</li>
             </ul>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Talent &amp; delivery</h3>
             <ul>
               <li>Talent acquisition leadership</li>
@@ -506,7 +612,7 @@
               <li>Bench sales (H-1B / GC / USC)</li>
             </ul>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Tools &amp; stack</h3>
             <ul>
               <li>Google Workspace &amp; Sheets</li>
@@ -521,19 +627,19 @@
       </section>
 
       <section class="section education" id="education">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Education &amp; languages</p>
-          <h2>Foundations.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Education &amp; languages</p>
+          <h2 data-reveal>Foundations.</h2>
         </div>
-        <article class="edu-card reveal">
+        <article class="edu-card" data-reveal data-spotlight>
           <div>
             <h3>B.Com. Computers</h3>
             <p>International Degree College · Hyderabad</p>
             <p class="edu-dates">Jan 2019 - Jan 2022</p>
           </div>
-          <span>Commerce · Computers</span>
+          <span class="edu-tag">Commerce · Computers</span>
         </article>
-        <div class="lang-row reveal">
+        <div class="lang-row" data-reveal>
           <span><strong>English</strong> Fluent</span>
           <span><strong>Hindi</strong> Native</span>
           <span><strong>Urdu</strong> Native</span>
@@ -542,19 +648,19 @@
       </section>
 
       <section class="section explore" id="explore">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Explore</p>
-          <h2>Always learning. Always curious.</h2>
+        <div class="section-heading">
+          <p class="eyebrow" data-reveal>Explore</p>
+          <h2 data-reveal>Always learning. Always curious.</h2>
         </div>
         <div class="explore-grid">
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Tech exploration</h3>
             <p>
               I love digging into electronics, AI tools, and emerging platforms
               to see what can actually help people work better.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Automation enthusiast</h3>
             <p>
               I experiment with automation workflows and productivity systems
@@ -563,7 +669,7 @@
               to enhance business operations and help teams save time.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Continuous learning</h3>
             <p>
               I stay hands-on with new software, SaaS products, and tech
@@ -571,7 +677,7 @@
               trendy.
             </p>
           </article>
-          <article class="reveal">
+          <article data-reveal data-spotlight data-tilt>
             <h3>Life outside work</h3>
             <p>
               Gardening, travel, and animal welfare keep me grounded and remind
@@ -582,7 +688,7 @@
       </section>
 
       <section class="section contact" id="contact">
-        <div class="contact-panel reveal">
+        <div class="contact-panel" data-reveal>
           <p class="eyebrow">Let's talk</p>
           <h2>Contact me.</h2>
           <p class="contact-copy">
@@ -605,8 +711,10 @@
               href="https://www.linkedin.com/in/ahmedhussainpvt/"
               target="_blank"
               rel="noopener noreferrer"
+              data-magnetic
+              data-ripple
             >
-              LinkedIn
+              <span>LinkedIn</span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M7 17L17 7M17 7H8M17 7v9"
@@ -618,8 +726,14 @@
                 />
               </svg>
             </a>
-            <a class="btn btn-ghost contact-resume" href="Ahmed%20Resume.pdf" download>
-              Download resume
+            <a
+              class="btn btn-ghost contact-resume"
+              href="Ahmed%20Resume.pdf"
+              download
+              data-magnetic
+              data-ripple
+            >
+              <span>Download resume</span>
             </a>
           </div>
 
@@ -636,8 +750,13 @@
               Message
               <textarea name="message" rows="5" required></textarea>
             </label>
-            <button class="btn btn-primary" type="submit" id="contact-submit">
-              Send message
+            <button
+              class="btn btn-primary"
+              type="submit"
+              id="contact-submit"
+              data-ripple
+            >
+              <span>Send message</span>
             </button>
             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
           </form>
@@ -659,7 +778,7 @@
       aria-label="Back to top"
       hidden
     >
-      ↑
+      <span aria-hidden="true">↑</span>
     </button>
 
     <script src="script.js"></script>
