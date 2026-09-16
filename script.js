@@ -129,6 +129,29 @@ if (!reducedMotion && prefersFineDesktop && typeof Lenis === "function") {
   });
 }
 
+/* Always land at the top on refresh / restore (not on intentional #hash clicks). */
+const jumpToTopNow = () => {
+  if (lenis) {
+    lenis.scrollTo(0, { immediate: true });
+  } else {
+    window.scrollTo(0, 0);
+  }
+  requestScrollUpdate();
+};
+
+const navEntry = performance.getEntriesByType?.("navigation")?.[0];
+const isReload = navEntry?.type === "reload";
+
+if (isReload && location.hash) {
+  history.replaceState(null, "", location.pathname + location.search);
+}
+
+jumpToTopNow();
+window.addEventListener("load", jumpToTopNow);
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted || isReload) jumpToTopNow();
+});
+
 const scrollToTop = () => {
   if (lenis) {
     lenis.scrollTo(0, { duration: 1.1 });
