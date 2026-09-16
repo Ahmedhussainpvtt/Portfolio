@@ -139,7 +139,7 @@
     </header>
 
     <main id="main">
-      <section class="hero">
+      <section class="hero" data-stage data-stage-label="01" data-stage-name="Intro">
         <div class="hero-copy">
           <p class="badge" id="availability-badge" data-reveal hidden>
             <span class="pulse" aria-hidden="true"></span>
@@ -147,6 +147,9 @@
           </p>
           <p class="eyebrow" data-reveal>
             Hyderabad, Telangana, India · Working with global teams
+          </p>
+          <p class="hero-hello" data-reveal>
+            Hey, I’m
           </p>
           <h1 class="hero-title">
             <span class="line"><span data-reveal="mask">Ahmed</span></span>
@@ -277,7 +280,7 @@
         </div>
       </div>
 
-      <section class="section about" id="about">
+      <section class="section about" id="about" data-stage data-stage-label="02" data-stage-name="About">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>About</p>
           <h2 data-reveal>A short note on how I work.</h2>
@@ -327,7 +330,7 @@
         </div>
       </section>
 
-      <section class="section capability" id="capabilities">
+      <section class="section capability" id="capabilities" data-stage data-stage-label="03" data-stage-name="Capabilities">
         <div class="capability-layout">
           <div class="capability-intro">
             <div class="section-heading">
@@ -489,7 +492,7 @@
         </div>
       </section>
 
-      <section class="section leadership" id="leadership">
+      <section class="section leadership" id="leadership" data-stage data-stage-label="04" data-stage-name="Leadership">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Leadership</p>
           <h2 data-reveal>Comfortable in the room with decision makers.</h2>
@@ -546,7 +549,7 @@
         </div>
       </section>
 
-      <section class="section experience" id="experience">
+      <section class="section experience" id="experience" data-stage data-stage-label="05" data-stage-name="Experience">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Experience</p>
           <h2 data-reveal>Where the work has taken me.</h2>
@@ -697,7 +700,7 @@
         </ol>
       </section>
 
-      <section class="section achievements" id="achievements">
+      <section class="section achievements" id="achievements" data-stage data-stage-label="06" data-stage-name="Highlights">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Highlights</p>
           <h2 data-reveal>How I create impact.</h2>
@@ -741,7 +744,7 @@
         </div>
       </section>
 
-      <section class="section approach" id="approach">
+      <section class="section approach" id="approach" data-stage data-stage-label="07" data-stage-name="Approach">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Approach</p>
           <h2 data-reveal>How I get things done.</h2>
@@ -805,7 +808,7 @@
         </div>
       </section>
 
-      <section class="section expertise" id="expertise">
+      <section class="section expertise" id="expertise" data-stage data-stage-label="08" data-stage-name="Skills">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Skills</p>
           <h2 data-reveal>What I bring to the table.</h2>
@@ -858,7 +861,7 @@
         </div>
       </section>
 
-      <section class="section education" id="education">
+      <section class="section education" id="education" data-stage data-stage-label="09" data-stage-name="Education">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Education &amp; languages</p>
           <h2 data-reveal>Foundations.</h2>
@@ -879,7 +882,7 @@
         </div>
       </section>
 
-      <section class="section explore" id="explore">
+      <section class="section explore" id="explore" data-stage data-stage-label="10" data-stage-name="Explore">
         <div class="section-heading">
           <p class="eyebrow" data-reveal>Explore</p>
           <h2 data-reveal>Always learning. Always curious.</h2>
@@ -919,7 +922,7 @@
         </div>
       </section>
 
-      <section class="section contact" id="contact">
+      <section class="section contact" id="contact" data-stage data-stage-label="11" data-stage-name="Contact">
         <div class="contact-panel" data-reveal>
           <p class="eyebrow">Let's talk</p>
           <h2>Contact me.</h2>
@@ -1014,6 +1017,11 @@
       </button>
     </footer>
 
+    <div class="section-index" id="section-index" aria-hidden="true">
+      <span class="section-index-label">Section</span>
+      <span class="section-index-num" id="section-index-num">01</span>
+    </div>
+
     <button
       type="button"
       class="back-to-top"
@@ -1024,6 +1032,7 @@
       <span aria-hidden="true">↑</span>
     </button>
 
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

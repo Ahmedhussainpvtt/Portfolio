@@ -41,16 +41,35 @@ const sections = navLinks
   .map((link) => document.querySelector(link.getAttribute("href")))
   .filter(Boolean);
 
+const stageSections = [...document.querySelectorAll("[data-stage]")];
+const sectionIndex = document.getElementById("section-index");
+const sectionIndexNum = document.getElementById("section-index-num");
+const aurora = document.querySelector(".aurora");
+
 let scrollQueued = false;
+let activeStage = null;
+let lenis = null;
+
+const prefersFineDesktop =
+  finePointer && window.matchMedia("(min-width: 981px)").matches;
+
+const setStageNumber = (label) => {
+  if (!sectionIndexNum || !label || sectionIndexNum.textContent === label) return;
+  sectionIndexNum.textContent = label;
+  sectionIndexNum.classList.remove("is-enter");
+  // force a reflow so the enter animation restarts cleanly
+  void sectionIndexNum.offsetWidth;
+  sectionIndexNum.classList.add("is-enter");
+};
 
 const updateOnScroll = () => {
   scrollQueued = false;
-  const y = window.scrollY;
+  const y = window.scrollY || window.pageYOffset || 0;
   const max = document.documentElement.scrollHeight - window.innerHeight;
   const progress = max > 0 ? Math.min(y / max, 1) : 0;
 
   header.classList.toggle("scrolled", y > 12);
-  scrollBar.style.width = `${progress * 100}%`;
+  if (scrollBar) scrollBar.style.width = `${progress * 100}%`;
 
   const showTop = y > 480;
   backToTop.hidden = !showTop;
@@ -68,6 +87,29 @@ const updateOnScroll = () => {
     const isActive = Boolean(current) && link.getAttribute("href") === `#${current.id}`;
     link.classList.toggle("active", isActive);
   });
+
+  // stage number + active section (for cinematic section markers)
+  let stage = stageSections[0] || null;
+  const stageLine = window.innerHeight * 0.42;
+  stageSections.forEach((section) => {
+    if (section.getBoundingClientRect().top <= stageLine) stage = section;
+  });
+
+  if (stage && stage !== activeStage) {
+    if (activeStage) activeStage.classList.remove("is-stage-active");
+    stage.classList.add("is-stage-active");
+    activeStage = stage;
+    setStageNumber(stage.dataset.stageLabel || "");
+  }
+
+  if (sectionIndex) {
+    sectionIndex.classList.toggle("is-on", y > window.innerHeight * 0.55);
+  }
+
+  // very light background parallax (transform only)
+  if (aurora && !reducedMotion && prefersFineDesktop) {
+    aurora.style.setProperty("--aurora-y", `${(progress * -48).toFixed(1)}px`);
+  }
 };
 
 const requestScrollUpdate = () => {
@@ -82,8 +124,46 @@ window.addEventListener("resize", requestScrollUpdate);
 window.addEventListener("load", requestScrollUpdate);
 window.addEventListener("hashchange", () => setTimeout(requestScrollUpdate, 600));
 
+/* ---------- smooth / inertial scrolling ---------- */
+
+if (!reducedMotion && prefersFineDesktop && typeof Lenis === "function") {
+  lenis = new Lenis({
+    duration: 1.05,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    syncTouch: false,
+    wheelMultiplier: 0.95,
+  });
+
+  document.documentElement.classList.add("lenis");
+
+  lenis.on("scroll", requestScrollUpdate);
+
+  const raf = (time) => {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  };
+  requestAnimationFrame(raf);
+
+  // keep in-page anchors silky with Lenis instead of native jump
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const id = link.getAttribute("href");
+      if (!id || id === "#") return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      event.preventDefault();
+      lenis.scrollTo(target, { offset: -88, duration: 1.15 });
+    });
+  });
+}
+
 const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  if (lenis) {
+    lenis.scrollTo(0, { duration: 1.1 });
+  } else {
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  }
   history.replaceState(null, "", window.location.pathname + window.location.search);
 };
 
@@ -110,7 +190,7 @@ nav.querySelectorAll("a").forEach((link) => {
   });
 });
 
-/* ---------- scroll reveals ---------- */
+/* ---------- scroll reveals (bidirectional) ---------- */
 
 const revealEls = [...document.querySelectorAll("[data-reveal]")];
 
@@ -127,7 +207,8 @@ revealEls.forEach((el) => {
     index = Math.max(siblings.indexOf(el), 0);
   }
 
-  el.style.setProperty("--d", `${Math.min(index, 6) * 90}ms`);
+  // slightly wider stagger so heading → copy → actions read as a sequence
+  el.style.setProperty("--d", `${Math.min(index, 8) * 110}ms`);
 });
 
 // Masked elements sit outside their clipping parent until revealed, so they can
@@ -146,18 +227,15 @@ if ("IntersectionObserver" in window && !reducedMotion) {
   const revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        // also catch anything already scrolled past, so a fast scroll or a
-        // deep link never leaves a section stuck invisible
-        const scrolledPast = entry.boundingClientRect.bottom < 0;
-        if (!entry.isIntersecting && !scrolledPast) return;
+        const group = revealGroups.get(entry.target) || [];
+        const show = entry.isIntersecting || entry.boundingClientRect.bottom < 0;
 
-        (revealGroups.get(entry.target) || []).forEach((el) =>
-          el.classList.add("is-visible")
-        );
-        revealObserver.unobserve(entry.target);
+        group.forEach((el) => {
+          el.classList.toggle("is-visible", show);
+        });
       });
     },
-    { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+    { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }
   );
 
   revealGroups.forEach((_els, watched) => revealObserver.observe(watched));
