@@ -169,105 +169,164 @@ document.querySelector(".logo")?.addEventListener("click", (event) => {
   scrollToTop();
 });
 
-/* Back-to-top behaves like chewing gum: the button stays anchored while its body
-   stretches out towards the cursor, then snaps home once pulled past BREAK. */
-if (finePointer && !reducedMotion && backToTop) {
-  const CATCH = 470; // cursor must come this close before the gum grabs on
-  const BREAK = 430; // shape snaps home once pulled this far out
-  const PULL_RATIO = 0.95; // how closely the far end tracks the cursor
-  const THICK = 50; // body thickness at rest
-  const THIN = 29; // body thickness when fully stretched
+/* Stretchy pull for CTAs: the button follows the cursor and elongates toward it,
+   then snaps home once pulled past BREAK. Back-to-top stays a normal button. */
+if (finePointer && !reducedMotion) {
+  const CATCH = 160;
+  const BREAK = 280;
+  const PULL_RATIO = 0.72;
+
+  const buttons = [...document.querySelectorAll(".btn, .nav-cta")];
+  const active = new Map();
 
   let pointerX = 0;
   let pointerY = 0;
-  let pulling = false;
   let frame = 0;
-  let snapTimer = 0;
 
-  const rest = () => ({ angle: 0, length: 0, thickness: THICK });
+  const rest = () => ({ x: 0, y: 0, sx: 1, sy: 1, angle: 0 });
 
-  let state = rest();
-  let target = rest();
+  const apply = (el, state) => {
+    el.style.setProperty("--tx", `${state.x.toFixed(2)}px`);
+    el.style.setProperty("--ty", `${state.y.toFixed(2)}px`);
+    el.style.setProperty("--stretch-x", state.sx.toFixed(3));
+    el.style.setProperty("--stretch-y", state.sy.toFixed(3));
+    el.style.setProperty("--pull-angle", `${state.angle.toFixed(2)}deg`);
+  };
 
-  const apply = () => {
-    backToTop.style.setProperty("--gum-angle", `${state.angle.toFixed(2)}deg`);
-    backToTop.style.setProperty("--gum-length", `${state.length.toFixed(2)}px`);
-    backToTop.style.setProperty("--gum-thickness", `${state.thickness.toFixed(2)}px`);
+  const release = (el, entry) => {
+    if (!entry.pulling) return;
+    entry.pulling = false;
+    entry.target = rest();
+    el.classList.remove("is-pulling");
+    el.classList.add("is-snapping");
+    entry.state = rest();
+    apply(el, entry.state);
+    clearTimeout(entry.snapTimer);
+    entry.snapTimer = setTimeout(() => {
+      el.classList.remove("is-snapping");
+      entry.state = rest();
+      apply(el, entry.state);
+      active.delete(el);
+    }, 560);
   };
 
   const tick = () => {
-    const ease = 0.24;
-    state.length += (target.length - state.length) * ease;
-    state.thickness += (target.thickness - state.thickness) * ease;
-    state.angle = target.angle;
-    apply();
+    let busy = false;
 
-    const atRest = !pulling && Math.abs(state.length) < 0.3;
+    active.forEach((entry, el) => {
+      const ease = entry.pulling ? 0.28 : 0.22;
+      entry.state.x += (entry.target.x - entry.state.x) * ease;
+      entry.state.y += (entry.target.y - entry.state.y) * ease;
+      entry.state.sx += (entry.target.sx - entry.state.sx) * ease;
+      entry.state.sy += (entry.target.sy - entry.state.sy) * ease;
+      entry.state.angle = entry.target.angle;
+      apply(el, entry.state);
 
-    if (atRest) {
-      state = rest();
-      apply();
-      frame = 0;
-      return;
-    }
+      const settled =
+        !entry.pulling &&
+        Math.abs(entry.state.x) < 0.2 &&
+        Math.abs(entry.state.y) < 0.2 &&
+        Math.abs(entry.state.sx - 1) < 0.01;
 
-    frame = requestAnimationFrame(tick);
+      if (!settled) busy = true;
+    });
+
+    frame = busy ? requestAnimationFrame(tick) : 0;
   };
 
   const startLoop = () => {
     if (!frame) frame = requestAnimationFrame(tick);
   };
 
-  const release = () => {
-    if (!pulling) return;
-    pulling = false;
-    target = rest();
-
-    // let CSS spring the snap-back, then hand control back to the rAF loop
-    backToTop.classList.add("is-snapping");
-    state = rest();
-    apply();
-    clearTimeout(snapTimer);
-    snapTimer = setTimeout(() => {
-      backToTop.classList.remove("is-snapping");
-      state = rest();
-      apply();
-    }, 520);
-  };
-
   const updateFromPointer = () => {
-    if (!backToTop.classList.contains("is-stuck")) {
-      release();
-      return;
+    // only one CTA stretches at a time: the closest within CATCH, or the
+    // one already being pulled
+    let pullingEl = null;
+    active.forEach((entry, el) => {
+      if (entry.pulling) pullingEl = el;
+    });
+
+    let nearest = null;
+    let nearestDist = Infinity;
+
+    if (!pullingEl) {
+      buttons.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) return;
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dist = Math.hypot(pointerX - cx, pointerY - cy);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = el;
+        }
+      });
+      if (!nearest || nearestDist > CATCH) {
+        active.forEach((entry, el) => {
+          if (!entry.pulling) active.delete(el);
+        });
+        return;
+      }
+      pullingEl = nearest;
     }
 
-    const rect = backToTop.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
+    const el = pullingEl;
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+
+    let entry = active.get(el);
+    const liveCx = rect.left + rect.width / 2;
+    const liveCy = rect.top + rect.height / 2;
+
+    // once grabbed, keep measuring from the rest centre so the stretch
+    // transform does not chase its own moving bounding box
+    const cx = entry?.pulling ? entry.originX : liveCx;
+    const cy = entry?.pulling ? entry.originY : liveCy;
     const dx = pointerX - cx;
     const dy = pointerY - cy;
     const dist = Math.hypot(dx, dy) || 0.0001;
+    const baseSize = entry?.pulling
+      ? entry.baseSize
+      : Math.max(rect.width, rect.height);
+    const reachLimit = baseSize * 0.5 + BREAK;
 
-    if (!pulling && dist > CATCH) return;
-    if (dist > BREAK) {
-      release();
+    if (!entry) {
+      entry = {
+        pulling: false,
+        state: rest(),
+        target: rest(),
+        snapTimer: 0,
+        originX: liveCx,
+        originY: liveCy,
+        baseSize: Math.max(rect.width, rect.height),
+      };
+      active.set(el, entry);
+    }
+
+    if (dist > reachLimit) {
+      release(el, entry);
       return;
     }
 
-    if (!pulling) {
-      pulling = true;
-      backToTop.classList.remove("is-snapping");
-      clearTimeout(snapTimer);
+    if (!entry.pulling) {
+      entry.pulling = true;
+      entry.originX = liveCx;
+      entry.originY = liveCy;
+      entry.baseSize = Math.max(rect.width, rect.height);
+      el.classList.add("is-pulling");
+      el.classList.remove("is-snapping");
+      clearTimeout(entry.snapTimer);
     }
 
-    const t = Math.min(dist / BREAK, 1);
+    const t = Math.min(dist / reachLimit, 1);
     const reach = dist * PULL_RATIO;
 
-    target.angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    // stays thick so the whole thing reads as one stretched button, not a string
-    target.thickness = THICK - (THICK - THIN) * t;
-    // the band's own rounded cap forms the far end, so extend past the cursor
-    target.length = reach + target.thickness / 2;
+    entry.target.angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    entry.target.x = (dx / dist) * reach;
+    entry.target.y = (dy / dist) * reach;
+    // elongate toward the cursor, squash on the cross-axis
+    entry.target.sx = 1 + t * 0.42;
+    entry.target.sy = 1 - t * 0.2;
     startLoop();
   };
 
@@ -281,9 +340,13 @@ if (finePointer && !reducedMotion && backToTop) {
     { passive: true }
   );
 
-  window.addEventListener("blur", release);
-  document.addEventListener("pointerleave", release);
-  window.addEventListener("scroll", updateFromPointer, { passive: true });
+  window.addEventListener("blur", () => {
+    active.forEach((entry, el) => release(el, entry));
+  });
+
+  document.addEventListener("pointerleave", () => {
+    active.forEach((entry, el) => release(el, entry));
+  });
 }
 
 /* ---------- navigation ---------- */
@@ -387,25 +450,6 @@ if (finePointer && !reducedMotion) {
     card.addEventListener("pointerleave", () => {
       card.style.setProperty("--ry", "0deg");
       card.style.setProperty("--rx", "0deg");
-    });
-  });
-
-  document.querySelectorAll("[data-magnetic]").forEach((el) => {
-    el.addEventListener(
-      "pointermove",
-      (event) => {
-        const rect = el.getBoundingClientRect();
-        const dx = event.clientX - (rect.left + rect.width / 2);
-        const dy = event.clientY - (rect.top + rect.height / 2);
-        el.style.setProperty("--tx", `${Math.max(Math.min(dx * 0.22, 10), -10)}px`);
-        el.style.setProperty("--ty", `${Math.max(Math.min(dy * 0.32, 8), -8)}px`);
-      },
-      { passive: true }
-    );
-
-    el.addEventListener("pointerleave", () => {
-      el.style.setProperty("--tx", "0px");
-      el.style.setProperty("--ty", "0px");
     });
   });
 }

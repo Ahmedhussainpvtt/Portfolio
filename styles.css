@@ -384,7 +384,13 @@ main,
   padding: 0.55rem 1.1rem;
   border-radius: 999px;
   overflow: hidden;
-  transform: translate3d(var(--tx, 0), var(--ty, 0), 0);
+  --tx: 0px;
+  --ty: 0px;
+  --stretch-x: 1;
+  --stretch-y: 1;
+  --pull-angle: 0deg;
+  transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--pull-angle))
+    scale(var(--stretch-x), var(--stretch-y)) rotate(calc(var(--pull-angle) * -1));
   transition: background 0.3s ease, transform 0.25s var(--ease),
     box-shadow 0.3s ease;
 }
@@ -460,8 +466,28 @@ main,
   font-weight: 500;
   border-radius: 999px;
   padding: 0.9rem 1.45rem;
-  transform: translate3d(var(--tx, 0), var(--ty, 0), 0);
+  --tx: 0px;
+  --ty: 0px;
+  --stretch-x: 1;
+  --stretch-y: 1;
+  --pull-angle: 0deg;
+  transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--pull-angle))
+    scale(var(--stretch-x), var(--stretch-y)) rotate(calc(var(--pull-angle) * -1));
   transition: transform 0.25s var(--ease), background 0.3s ease,
+    color 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+}
+
+.btn.is-pulling,
+.nav-cta.is-pulling {
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.35s ease,
+    border-color 0.3s ease;
+  will-change: transform;
+  z-index: 5;
+}
+
+.btn.is-snapping,
+.nav-cta.is-snapping {
+  transition: transform 0.55s cubic-bezier(0.2, 1.55, 0.35, 1), background 0.3s ease,
     color 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
 }
 
@@ -1936,10 +1962,6 @@ main,
 }
 
 .back-to-top {
-  /* gum pull state, driven by script.js */
-  --gum-angle: 0deg;
-  --gum-length: 0px;
-  --gum-thickness: 50px;
   position: fixed;
   right: 1.2rem;
   bottom: 1.4rem;
@@ -1949,7 +1971,7 @@ main,
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: transparent;
+  background: var(--ink);
   color: var(--bg);
   font-size: 1.15rem;
   line-height: 1;
@@ -1959,8 +1981,10 @@ main,
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  box-shadow: 0 12px 26px rgba(12, 31, 48, 0.24);
   transform: translate3d(0, 18px, 0) scale(0.92);
-  transition: opacity 0.45s ease, visibility 0.45s ease, transform 0.45s var(--ease);
+  transition: opacity 0.45s ease, visibility 0.45s ease, transform 0.45s var(--ease),
+    background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .back-to-top.is-stuck {
@@ -1968,50 +1992,6 @@ main,
   visibility: visible;
   pointer-events: auto;
   transform: none;
-}
-
-/* the gum body sits in its own filtered layer so the arrow and ring stay sharp */
-.gum {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  filter: url(#goo) drop-shadow(0 12px 26px rgba(12, 31, 48, 0.24));
-}
-
-.gum-core,
-.gum-neck {
-  position: absolute;
-  background: var(--ink);
-  transition: background 0.3s ease;
-}
-
-.gum-core {
-  inset: 0;
-  border-radius: 999px;
-}
-
-/* stretches from the anchor centre out towards the cursor, thinning as it goes */
-.gum-neck {
-  left: 50%;
-  top: 50%;
-  width: var(--gum-length);
-  height: var(--gum-thickness);
-  border-radius: 999px;
-  transform-origin: 0 50%;
-  transform: rotate(var(--gum-angle)) translate3d(0, -50%, 0);
-  will-change: width, height, transform;
-}
-
-.back-to-top.is-snapping .gum-neck {
-  transition: width 0.5s cubic-bezier(0.2, 1.5, 0.4, 1),
-    height 0.5s cubic-bezier(0.2, 1.5, 0.4, 1),
-    transform 0.5s cubic-bezier(0.2, 1.5, 0.4, 1), background 0.3s ease;
-}
-
-.back-to-top-label {
-  position: relative;
-  z-index: 2;
-  display: block;
 }
 
 .back-to-top::before {
@@ -2033,15 +2013,14 @@ main,
     transparent calc(100% - 3px),
     #000 calc(100% - 3px)
   );
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
 }
 
-.back-to-top:hover .gum-core,
-.back-to-top:hover .gum-neck,
-.back-to-top:focus-visible .gum-core,
-.back-to-top:focus-visible .gum-neck {
+.back-to-top:hover,
+.back-to-top:focus-visible {
   background: var(--teal);
+  box-shadow: 0 16px 30px rgba(15, 108, 133, 0.32);
 }
 
 /* ---------- reveal system ---------- */
