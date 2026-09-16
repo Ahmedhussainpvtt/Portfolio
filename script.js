@@ -221,6 +221,49 @@ if (finePointer && !reducedMotion) {
   });
 }
 
+/* Spin the glowing rim from here rather than with a CSS keyframe: animating a
+   custom property needs @property support, which some browsers lack, and there
+   it silently freezes at one angle instead of rotating. */
+if (finePointer && !reducedMotion) {
+  const RIM_SPIN_MS = 1800;
+  const spinning = new Set();
+  let spinFrame = null;
+  let spinStart = 0;
+
+  const stepSpin = (now) => {
+    if (!spinning.size) {
+      spinFrame = null;
+      spinStart = 0;
+      return;
+    }
+
+    if (!spinStart) spinStart = now;
+    const angle = (((now - spinStart) / RIM_SPIN_MS) * 360) % 360;
+    spinning.forEach((el) => {
+      el.style.setProperty("--angle", `${angle.toFixed(1)}deg`);
+    });
+    spinFrame = requestAnimationFrame(stepSpin);
+  };
+
+  const startSpin = (el) => {
+    spinning.add(el);
+    if (!spinFrame) spinFrame = requestAnimationFrame(stepSpin);
+  };
+
+  const stopSpin = (el) => {
+    spinning.delete(el);
+    el.style.removeProperty("--angle");
+  };
+
+  document.querySelectorAll(".btn, .nav-cta").forEach((el) => {
+    el.addEventListener("pointerenter", () => startSpin(el));
+    el.addEventListener("pointerleave", () => stopSpin(el));
+    el.addEventListener("pointercancel", () => stopSpin(el));
+    el.addEventListener("focus", () => startSpin(el));
+    el.addEventListener("blur", () => stopSpin(el));
+  });
+}
+
 document.querySelectorAll("[data-ripple]").forEach((el) => {
   el.addEventListener("pointerdown", (event) => {
     if (reducedMotion) return;
