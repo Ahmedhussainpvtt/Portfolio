@@ -2019,15 +2019,21 @@ main,
 
 /* ---------- split headings ---------- */
 
-/* script.js wraps each heading word so it can rise into place on its own beat.
-   The gradient is sized to the whole heading and offset per word, so it still
-   reads as one continuous sweep across the line. */
+/* Each word sits in a hard clip. The rise transform lives on a middle wrapper
+   so background-clip:text on .word cannot paint outside the mask (Chromium
+   otherwise lets gradient text bleed into neighbouring words mid-animation). */
 .section-heading h2 .w {
   display: inline-block;
   overflow: hidden;
+  overflow: clip;
   vertical-align: bottom;
-  padding-bottom: 0.16em;
-  margin-bottom: -0.16em;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.section-heading h2 .rise {
+  display: inline-block;
+  will-change: transform;
 }
 
 .section-heading h2 .word {
@@ -2041,19 +2047,21 @@ main,
   color: transparent;
 }
 
-html.js .section-heading h2.is-split {
-  opacity: 1;
-  transform: none;
-  filter: none;
+html.js .section-heading h2.is-split,
+html.js .section-heading h2.is-split.is-visible {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  will-change: auto;
 }
 
-html.js .section-heading h2.is-split .word {
-  transform: translate3d(0, 116%, 0) rotate(2.5deg);
-  transition: transform 0.95s var(--ease);
+html.js .section-heading h2.is-split .rise {
+  transform: translate3d(0, 110%, 0);
+  transition: transform 0.7s var(--ease);
   transition-delay: var(--wd, 0ms);
 }
 
-html.js .section-heading h2.is-split.is-visible .word {
+html.js .section-heading h2.is-split.is-visible .rise {
   transform: none;
 }
 
@@ -2411,6 +2419,7 @@ html.js [data-tilt].is-visible {
     transition-duration: 0.001s !important;
   }
 
+  html.js .section-heading h2.is-split .rise,
   html.js .section-heading h2.is-split .word,
   html.js [data-reveal],
   html.js [data-reveal="mask"] {

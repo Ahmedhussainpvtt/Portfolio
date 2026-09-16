@@ -414,6 +414,10 @@ if ("IntersectionObserver" in window && !reducedMotion) {
         const show = entry.isIntersecting || entry.boundingClientRect.bottom < 0;
 
         group.forEach((el) => {
+          // split headings play once: reversing them mid-scroll remixes words
+          if (el.classList.contains("is-split") && el.classList.contains("is-visible") && !show) {
+            return;
+          }
           el.classList.toggle("is-visible", show);
         });
       });
@@ -439,14 +443,17 @@ if (splitHeadings.length && !reducedMotion) {
 
     words.forEach((word, index) => {
       const clip = document.createElement("span");
+      const rise = document.createElement("span");
       const inner = document.createElement("span");
 
       clip.className = "w";
+      rise.className = "rise";
       inner.className = "word";
       inner.textContent = word;
-      inner.style.setProperty("--wd", `${index * 70}ms`);
+      rise.style.setProperty("--wd", `${index * 55}ms`);
 
-      clip.appendChild(inner);
+      rise.appendChild(inner);
+      clip.appendChild(rise);
       heading.appendChild(clip);
       if (index < words.length - 1) heading.appendChild(document.createTextNode(" "));
     });
