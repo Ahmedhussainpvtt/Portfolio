@@ -617,7 +617,10 @@ if (finePointer && !reducedMotion) {
 /* Spin the glowing rim from here rather than with a CSS keyframe: animating a
    custom property needs @property support, which some browsers lack, and there
    it silently freezes at one angle instead of rotating. */
-if (finePointer && !reducedMotion) {
+let startRimSpin = () => {};
+let stopRimSpin = () => {};
+
+if (!reducedMotion) {
   const RIM_SPIN_MS = 1800;
   const spinning = new Set();
   let spinFrame = null;
@@ -648,13 +651,19 @@ if (finePointer && !reducedMotion) {
     el.style.removeProperty("--angle");
   };
 
-  document.querySelectorAll(".btn, .nav-cta").forEach((el) => {
-    el.addEventListener("pointerenter", () => startSpin(el));
-    el.addEventListener("pointerleave", () => stopSpin(el));
-    el.addEventListener("pointercancel", () => stopSpin(el));
-    el.addEventListener("focus", () => startSpin(el));
-    el.addEventListener("blur", () => stopSpin(el));
-  });
+  startRimSpin = startSpin;
+  stopRimSpin = stopSpin;
+
+  // Touch has no hover, so there the spin is started by the press handler.
+  if (finePointer) {
+    document.querySelectorAll(".btn, .nav-cta").forEach((el) => {
+      el.addEventListener("pointerenter", () => startSpin(el));
+      el.addEventListener("pointerleave", () => stopSpin(el));
+      el.addEventListener("pointercancel", () => stopSpin(el));
+      el.addEventListener("focus", () => startSpin(el));
+      el.addEventListener("blur", () => stopSpin(el));
+    });
+  }
 }
 
 document.querySelectorAll("[data-ripple]").forEach((el) => {
@@ -698,7 +707,10 @@ if (!finePointer) {
   let pressedEl = null;
 
   const releasePress = () => {
-    if (pressedEl) pressedEl.classList.remove("is-pressed");
+    if (pressedEl) {
+      pressedEl.classList.remove("is-pressed");
+      stopRimSpin(pressedEl);
+    }
     pressedEl = null;
   };
 
@@ -710,6 +722,8 @@ if (!finePointer) {
       if (!target) return;
       pressedEl = target;
       target.classList.add("is-pressed");
+      // hold on a CTA and the glowing rim sweeps, same as a desktop hover
+      if (target.matches(".btn, .nav-cta")) startRimSpin(target);
     },
     { passive: true }
   );

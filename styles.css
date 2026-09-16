@@ -563,8 +563,10 @@ main,
 
 .btn:hover::before,
 .btn:focus-visible::before,
+.btn.is-pressed::before,
 .nav-cta:hover::before,
-.nav-cta:focus-visible::before {
+.nav-cta:focus-visible::before,
+.nav-cta.is-pressed::before {
   opacity: 1;
 }
 
@@ -2367,6 +2369,13 @@ html.js [data-tilt].is-visible {
     max-width: 100%;
   }
 
+  /* the ring and glow are positioned against this wrapper, so it has to match
+     the frame's cap or they orbit far wider than the photo */
+  .hero-portrait {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
   .portrait-frame {
     max-width: 420px;
     margin: 0 auto;
@@ -2377,7 +2386,6 @@ html.js [data-tilt].is-visible {
     inset: -6% 0;
   }
 
-  .portrait-ring,
   .scroll-cue {
     display: none;
   }
