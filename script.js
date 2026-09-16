@@ -42,6 +42,7 @@ const sections = navLinks
   .filter(Boolean);
 
 const aurora = document.querySelector(".aurora");
+const timeline = document.querySelector(".timeline");
 
 let scrollQueued = false;
 let lenis = null;
@@ -80,6 +81,14 @@ const updateOnScroll = () => {
   // very light background parallax (transform only)
   if (aurora && !reducedMotion && prefersFineDesktop) {
     aurora.style.setProperty("--aurora-y", `${(progress * -48).toFixed(1)}px`);
+  }
+
+  // the experience rail draws itself as the list passes the middle of the screen
+  if (timeline && !reducedMotion) {
+    const rect = timeline.getBoundingClientRect();
+    const line = window.innerHeight * 0.55;
+    const drawn = (line - rect.top) / rect.height;
+    timeline.style.setProperty("--tp", Math.max(Math.min(drawn, 1), 0).toFixed(3));
   }
 };
 
@@ -417,6 +426,150 @@ if ("IntersectionObserver" in window && !reducedMotion) {
   revealEls.forEach((el) => el.classList.add("is-visible"));
 }
 
+/* ---------- split headings ---------- */
+
+/* Wrap every heading word in a clipped box so the words can rise one after the
+   other. The gradient is re-anchored per word so the sweep stays continuous. */
+const splitHeadings = [...document.querySelectorAll(".section-heading h2")];
+
+if (splitHeadings.length && !reducedMotion) {
+  splitHeadings.forEach((heading) => {
+    const words = heading.textContent.trim().split(/\s+/);
+    heading.textContent = "";
+
+    words.forEach((word, index) => {
+      const clip = document.createElement("span");
+      const inner = document.createElement("span");
+
+      clip.className = "w";
+      inner.className = "word";
+      inner.textContent = word;
+      inner.style.setProperty("--wd", `${index * 70}ms`);
+
+      clip.appendChild(inner);
+      heading.appendChild(clip);
+      if (index < words.length - 1) heading.appendChild(document.createTextNode(" "));
+    });
+
+    heading.classList.add("is-split");
+  });
+
+  const anchorGradients = () => {
+    splitHeadings.forEach((heading) => {
+      const width = heading.getBoundingClientRect().width;
+      heading.querySelectorAll(".word").forEach((word) => {
+        word.style.setProperty("--hw", `${width.toFixed(1)}px`);
+        word.style.setProperty("--wx", `${word.offsetLeft.toFixed(1)}px`);
+      });
+    });
+  };
+
+  anchorGradients();
+  window.addEventListener("load", anchorGradients);
+
+  let anchorTimer = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(anchorTimer);
+    anchorTimer = setTimeout(anchorGradients, 180);
+  });
+}
+
+/* ---------- nav letter flip ---------- */
+
+if (!reducedMotion) {
+  nav.querySelectorAll("a:not(.nav-cta)").forEach((link) => {
+    const label = link.textContent.trim();
+    // the flip needs a duplicate of every letter, so name the link explicitly
+    link.setAttribute("aria-label", label);
+    link.textContent = "";
+
+    [...label].forEach((char, index) => {
+      if (char === " ") {
+        link.appendChild(document.createTextNode(" "));
+        return;
+      }
+
+      const box = document.createElement("span");
+      box.className = "fchar";
+      box.style.setProperty("--i", String(index));
+
+      const front = document.createElement("span");
+      const back = document.createElement("span");
+      front.textContent = char;
+      back.textContent = char;
+      back.setAttribute("aria-hidden", "true");
+
+      box.append(front, back);
+      link.appendChild(box);
+    });
+  });
+}
+
+/* ---------- marquee driven by scroll speed ---------- */
+
+const marquee = document.querySelector(".marquee");
+const marqueeTrack = marquee?.querySelector(".marquee-track");
+
+if (marqueeTrack && !reducedMotion) {
+  marquee.classList.add("is-live");
+
+  let half = marqueeTrack.scrollWidth / 2;
+  let offset = 0;
+  let lastY = window.scrollY;
+  let velocity = 0;
+  let hovered = false;
+  let visible = true;
+  let frame = 0;
+
+  window.addEventListener("resize", () => {
+    half = marqueeTrack.scrollWidth / 2;
+  });
+
+  marquee.addEventListener("pointerenter", () => {
+    hovered = true;
+  });
+  marquee.addEventListener("pointerleave", () => {
+    hovered = false;
+  });
+
+  const step = () => {
+    const y = window.scrollY;
+    // smoothed scroll delta: fast scrolling speeds the band up and can flip it
+    velocity += (y - lastY - velocity) * 0.16;
+    lastY = y;
+
+    const boost = Math.min(Math.abs(velocity) * 0.3, 7);
+    const direction = velocity < -0.5 ? 1 : -1;
+    const speed = hovered ? boost * 0.4 : 0.55 + boost;
+
+    offset += speed * direction;
+    if (offset <= -half) offset += half;
+    if (offset >= 0) offset -= half;
+
+    const skew = Math.max(Math.min(-velocity * 0.1, 6), -6);
+    marqueeTrack.style.transform = `translate3d(${offset.toFixed(
+      2
+    )}px, 0, 0) skewX(${skew.toFixed(2)}deg)`;
+
+    frame = visible ? requestAnimationFrame(step) : 0;
+  };
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible && !frame) {
+          lastY = window.scrollY;
+          frame = requestAnimationFrame(step);
+        }
+      },
+      { rootMargin: "120px 0px" }
+    ).observe(marquee);
+  } else {
+    frame = requestAnimationFrame(step);
+  }
+}
+
 /* ---------- pointer effects ---------- */
 
 document.querySelectorAll("[data-spotlight]").forEach((card) => {
@@ -544,6 +697,8 @@ if (finePointer && !reducedMotion && cursorGlow) {
   let targetY = window.innerHeight / 2;
   let currentX = targetX;
   let currentY = targetY;
+  let scale = 1;
+  let targetScale = 1;
 
   window.addEventListener(
     "pointermove",
@@ -559,10 +714,30 @@ if (finePointer && !reducedMotion && cursorGlow) {
     cursorGlow.classList.remove("is-on");
   });
 
+  // grows and warms whenever the cursor is over something you can act on
+  const hotSelector = "a, button, [data-tilt], .capability-head, input, textarea";
+
+  document.addEventListener("pointerover", (event) => {
+    if (event.target.closest?.(hotSelector)) {
+      cursorGlow.classList.add("is-hot");
+      targetScale = 1.32;
+    }
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    if (event.target.closest?.(hotSelector)) {
+      cursorGlow.classList.remove("is-hot");
+      targetScale = 1;
+    }
+  });
+
   const followCursor = () => {
     currentX += (targetX - currentX) * 0.12;
     currentY += (targetY - currentY) * 0.12;
-    cursorGlow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+    scale += (targetScale - scale) * 0.1;
+    cursorGlow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(${scale.toFixed(
+      3
+    )})`;
     requestAnimationFrame(followCursor);
   };
 
@@ -787,17 +962,44 @@ if (rotator && !reducedMotion) {
     "Customer Success",
     "Team Enablement",
   ];
+  const noise = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+=<>/";
+  const SCRAMBLE_MS = 620;
+
   let wordIndex = 0;
+
+  // each letter churns through random glyphs before settling on the real one
+  const scrambleTo = (text) => {
+    const from = rotator.textContent;
+    const length = Math.max(from.length, text.length);
+    const start = performance.now();
+
+    const step = (now) => {
+      const progress = Math.min((now - start) / SCRAMBLE_MS, 1);
+      let out = "";
+
+      for (let i = 0; i < length; i += 1) {
+        const settled = progress * length;
+
+        if (i < settled - 1) {
+          out += text[i] ?? "";
+        } else if (i < settled + 3 && text[i] !== " ") {
+          out += noise[Math.floor(Math.random() * noise.length)];
+        } else {
+          out += text[i] === " " ? " " : "";
+        }
+      }
+
+      rotator.textContent = progress === 1 ? text : out;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
+  };
 
   setInterval(() => {
     wordIndex = (wordIndex + 1) % words.length;
-    rotator.classList.add("is-swapping");
-
-    setTimeout(() => {
-      rotator.textContent = words[wordIndex];
-      rotator.classList.remove("is-swapping");
-    }, 350);
-  }, 2800);
+    scrambleTo(words[wordIndex]);
+  }, 3200);
 }
 
 /* ---------- contact form ---------- */

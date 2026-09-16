@@ -257,6 +257,11 @@ ol {
   opacity: 1;
 }
 
+/* warms up over anything interactive */
+.cursor-glow.is-hot {
+  background: radial-gradient(circle, rgba(189, 139, 82, 0.15) 0%, transparent 62%);
+}
+
 .scroll-progress {
   position: fixed;
   top: 0;
@@ -1114,17 +1119,6 @@ main,
   gap: 2.5rem;
   padding: 2.2rem 0;
   border-top: 1px solid var(--line);
-}
-
-.timeline > li::before {
-  content: "";
-  position: absolute;
-  left: 196px;
-  top: 3.1rem;
-  bottom: 0.4rem;
-  width: 1px;
-  background: linear-gradient(var(--teal), transparent);
-  opacity: 0.3;
 }
 
 .timeline > li::after {
@@ -2023,6 +2017,116 @@ main,
   box-shadow: 0 16px 30px rgba(15, 108, 133, 0.32);
 }
 
+/* ---------- split headings ---------- */
+
+/* script.js wraps each heading word so it can rise into place on its own beat.
+   The gradient is sized to the whole heading and offset per word, so it still
+   reads as one continuous sweep across the line. */
+.section-heading h2 .w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.section-heading h2 .word {
+  display: inline-block;
+  background-image: linear-gradient(100deg, var(--ink) 20%, var(--teal) 100%);
+  background-repeat: no-repeat;
+  background-size: var(--hw, 100%) 100%;
+  background-position: calc(var(--wx, 0px) * -1) 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.js .section-heading h2.is-split {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+html.js .section-heading h2.is-split .word {
+  transform: translate3d(0, 116%, 0) rotate(2.5deg);
+  transition: transform 0.95s var(--ease);
+  transition-delay: var(--wd, 0ms);
+}
+
+html.js .section-heading h2.is-split.is-visible .word {
+  transform: none;
+}
+
+/* ---------- nav letter flip ---------- */
+
+.site-nav a:not(.nav-cta) .fchar {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.site-nav a:not(.nav-cta) .fchar span {
+  display: inline-block;
+  transition: transform 0.45s var(--ease);
+  transition-delay: calc(var(--i, 0) * 20ms);
+}
+
+.site-nav a:not(.nav-cta) .fchar span + span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate3d(0, 106%, 0);
+  color: var(--teal);
+}
+
+.site-nav a:not(.nav-cta):hover .fchar span:first-child,
+.site-nav a:not(.nav-cta):focus-visible .fchar span:first-child {
+  transform: translate3d(0, -106%, 0);
+}
+
+.site-nav a:not(.nav-cta):hover .fchar span + span,
+.site-nav a:not(.nav-cta):focus-visible .fchar span + span {
+  transform: none;
+}
+
+/* ---------- timeline rail ---------- */
+
+.timeline {
+  position: relative;
+}
+
+.timeline::before,
+.timeline::after {
+  content: "";
+  position: absolute;
+  left: 196px;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  width: 1px;
+}
+
+.timeline::before {
+  background: var(--line);
+}
+
+/* fills as you scroll the list, so the rail draws itself */
+.timeline::after {
+  background: linear-gradient(var(--teal), var(--amber));
+  transform: scaleY(var(--tp, 0));
+  transform-origin: top center;
+  box-shadow: 0 0 10px rgba(15, 108, 133, 0.35);
+}
+
+/* ---------- marquee (script driven) ---------- */
+
+.marquee.is-live .marquee-track {
+  animation: none;
+  will-change: transform;
+}
+
 /* ---------- reveal system ---------- */
 
 html.js [data-reveal] {
@@ -2169,13 +2273,19 @@ html.js [data-tilt].is-visible {
     margin: 0 auto;
   }
 
+  /* the blurred glow is wider than the frame and was pushing the page sideways */
+  .portrait-glow {
+    inset: -6% 0;
+  }
+
   .portrait-ring,
   .scroll-cue {
     display: none;
   }
 
-  .timeline > li::before,
-  .timeline > li::after {
+  .timeline > li::after,
+  .timeline::before,
+  .timeline::after {
     display: none;
   }
 
@@ -2301,6 +2411,7 @@ html.js [data-tilt].is-visible {
     transition-duration: 0.001s !important;
   }
 
+  html.js .section-heading h2.is-split .word,
   html.js [data-reveal],
   html.js [data-reveal="mask"] {
     opacity: 1;
