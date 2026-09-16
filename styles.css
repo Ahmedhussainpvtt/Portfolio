@@ -2495,6 +2495,39 @@ html.js [data-tilt].is-visible {
   .cursor-glow {
     display: none;
   }
+
+  /* Touch has no hover proximity, so the desktop magnetic pull never fires.
+     A press dip gives taps the same physical feedback instead. */
+  .btn,
+  .nav-cta,
+  .back-to-top,
+  .back-to-top-link,
+  .capability-toggle,
+  .work-details summary {
+    transition: transform 0.22s var(--ease), background 0.3s ease,
+      color 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active,
+  .nav-cta:active,
+  .back-to-top:active,
+  .back-to-top-link:active,
+  .capability-toggle:active,
+  .work-details summary:active {
+    transform: scale(0.95);
+  }
+
+  .achievement-grid article:active,
+  .leadership-grid article:active,
+  .explore-grid article:active,
+  .skill-groups article:active,
+  .approach-steps li:active,
+  .stats article:active,
+  .edu-card:active {
+    transform: scale(0.985);
+    transition: transform 0.22s var(--ease);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
