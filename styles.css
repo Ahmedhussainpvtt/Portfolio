@@ -1938,7 +1938,7 @@ main,
 .back-to-top {
   position: fixed;
   right: 1.2rem;
-  bottom: 1.2rem;
+  bottom: 1.4rem;
   z-index: 45;
   width: 50px;
   height: 50px;
@@ -1952,8 +1952,19 @@ main,
   display: grid;
   place-items: center;
   box-shadow: 0 12px 28px rgba(12, 31, 48, 0.22);
-  transition: transform 0.3s var(--ease), background 0.3s ease,
-    opacity 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, 18px, 0) scale(0.92);
+  transition: transform 0.45s var(--ease), background 0.3s ease,
+    opacity 0.45s ease, visibility 0.45s ease, box-shadow 0.3s ease;
+}
+
+.back-to-top.is-stuck {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
 }
 
 .back-to-top::before {
@@ -1981,11 +1992,12 @@ main,
 .back-to-top:hover,
 .back-to-top:focus-visible {
   background: var(--teal);
-  transform: translateY(-3px) scale(1.05);
 }
 
-.back-to-top[hidden] {
-  display: none;
+.back-to-top.is-stuck:hover,
+.back-to-top.is-stuck:focus-visible {
+  transform: translate3d(0, -3px, 0) scale(1.05);
+  box-shadow: 0 16px 32px rgba(12, 31, 48, 0.28);
 }
 
 /* ---------- reveal system ---------- */

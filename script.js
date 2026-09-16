@@ -58,8 +58,10 @@ const updateOnScroll = () => {
   header.classList.toggle("scrolled", y > 12);
   if (scrollBar) scrollBar.style.width = `${progress * 100}%`;
 
-  const showTop = y > 480;
-  backToTop.hidden = !showTop;
+  const showTop = y > 140;
+  backToTop.classList.toggle("is-stuck", showTop);
+  backToTop.setAttribute("aria-hidden", showTop ? "false" : "true");
+  backToTop.tabIndex = showTop ? 0 : -1;
   backToTop.style.setProperty("--p", String(Math.round(progress * 100)));
 
   const activationLine = Math.max(140, window.innerHeight * 0.3);
