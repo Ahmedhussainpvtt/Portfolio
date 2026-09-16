@@ -146,7 +146,11 @@ if ("IntersectionObserver" in window && !reducedMotion) {
   const revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+        // also catch anything already scrolled past, so a fast scroll or a
+        // deep link never leaves a section stuck invisible
+        const scrolledPast = entry.boundingClientRect.bottom < 0;
+        if (!entry.isIntersecting && !scrolledPast) return;
+
         (revealGroups.get(entry.target) || []).forEach((el) =>
           el.classList.add("is-visible")
         );
@@ -335,7 +339,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   }
 
   burstAt = (x, y) => {
-    const colors = ["#2f5d4a", "#b8956a", "#3f9e6f", "#d7c4a3"];
+    const colors = ["#0f6c85", "#bd8b52", "#2f9ab5", "#e3c9a3"];
     for (let i = 0; i < 46; i += 1) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 5.5 + 1.8;
@@ -365,7 +369,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
 
       bgCtx.beginPath();
       bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      bgCtx.fillStyle = `rgba(47, 93, 74, ${p.a})`;
+      bgCtx.fillStyle = `rgba(15, 108, 133, ${p.a})`;
       bgCtx.fill();
     });
 
@@ -379,7 +383,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
         bgCtx.beginPath();
         bgCtx.moveTo(particles[i].x, particles[i].y);
         bgCtx.lineTo(particles[j].x, particles[j].y);
-        bgCtx.strokeStyle = `rgba(47, 93, 74, ${(1 - dist / 130) * 0.09})`;
+        bgCtx.strokeStyle = `rgba(15, 108, 133, ${(1 - dist / 130) * 0.09})`;
         bgCtx.lineWidth = 1;
         bgCtx.stroke();
       }
@@ -403,9 +407,10 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
       fxCtx.beginPath();
       fxCtx.moveTo(trail[i - 1].x, trail[i - 1].y);
       fxCtx.lineTo(trail[i].x, trail[i].y);
-      fxCtx.strokeStyle = `rgba(${Math.round(47 + t * 120)}, ${Math.round(
-        93 + t * 50
-      )}, ${Math.round(74 + t * 30)}, ${t * 0.55})`;
+      // tail fades from teal into the bronze head
+      fxCtx.strokeStyle = `rgba(${Math.round(15 + t * 174)}, ${Math.round(
+        108 + t * 31
+      )}, ${Math.round(133 - t * 51)}, ${t * 0.55})`;
       fxCtx.lineWidth = t * 7;
       fxCtx.lineCap = "round";
       fxCtx.lineJoin = "round";
@@ -415,11 +420,11 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     const head = trail[trail.length - 1];
     if (head && pointer.active && trail.length > 1) {
       fxCtx.save();
-      fxCtx.shadowColor = "rgba(184, 149, 106, 0.85)";
+      fxCtx.shadowColor = "rgba(189, 139, 82, 0.85)";
       fxCtx.shadowBlur = 12;
       fxCtx.beginPath();
       fxCtx.arc(head.x, head.y, 4, 0, Math.PI * 2);
-      fxCtx.fillStyle = "rgba(184, 149, 106, 0.9)";
+      fxCtx.fillStyle = "rgba(189, 139, 82, 0.9)";
       fxCtx.fill();
       fxCtx.restore();
     }
