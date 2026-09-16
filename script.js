@@ -676,6 +676,50 @@ document.querySelectorAll("[data-ripple]").forEach((el) => {
   });
 });
 
+/* Touch replacement for the desktop magnetic pull. Browsers apply :active
+   inconsistently on touch, so the press state is set from the touch events. */
+if (!finePointer) {
+  const PRESSABLE = [
+    ".btn",
+    ".nav-cta",
+    ".back-to-top",
+    ".back-to-top-link",
+    ".capability-toggle",
+    ".work-details summary",
+    ".achievement-grid article",
+    ".leadership-grid article",
+    ".explore-grid article",
+    ".skill-groups article",
+    ".approach-steps li",
+    ".stats article",
+    ".edu-card",
+  ].join(", ");
+
+  let pressedEl = null;
+
+  const releasePress = () => {
+    if (pressedEl) pressedEl.classList.remove("is-pressed");
+    pressedEl = null;
+  };
+
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      releasePress();
+      const target = event.target.closest && event.target.closest(PRESSABLE);
+      if (!target) return;
+      pressedEl = target;
+      target.classList.add("is-pressed");
+    },
+    { passive: true }
+  );
+
+  document.addEventListener("touchend", releasePress, { passive: true });
+  document.addEventListener("touchcancel", releasePress, { passive: true });
+  // a press that turns into a scroll should not stay dented
+  window.addEventListener("scroll", releasePress, { passive: true });
+}
+
 /* Capability rows open on hover, so the button is here for taps and keyboards.
    Where hover does not exist the rows stay open, matching the stylesheet. */
 const capabilityToggles = document.querySelectorAll(".capability-toggle");
@@ -769,7 +813,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   let linkDist = 130;
   let sparks = [];
   const trail = [];
-  const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0, down: false };
+  const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0 };
   // Touch has no hovering position, so the tail rides finger drags instead.
   // It samples wider apart there: the hand covers the tip, so the ribbon needs
   // to reach further back to stay visible without costing more points.
@@ -812,63 +856,77 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   resize();
   window.addEventListener("resize", resize);
 
-  window.addEventListener(
-    "pointermove",
-    (event) => {
-      if (touchTrail && !pointer.down) return;
+  const trackPoint = (x, y) => {
+    const moved = Math.hypot(x - pointer.x, y - pointer.y);
 
-      const dx = event.clientX - pointer.x;
-      const dy = event.clientY - pointer.y;
-      const moved = Math.hypot(dx, dy);
+    pointer.x = x;
+    pointer.y = y;
+    pointer.active = true;
 
-      pointer.x = event.clientX;
-      pointer.y = event.clientY;
-      pointer.active = true;
+    // ignore micro jitter so a resting cursor does not keep a tail alive
+    if (moved > 0.6) {
+      pointer.moving = true;
+      pointer.lastMove = performance.now();
+    }
 
-      // ignore micro jitter so a resting cursor does not keep a tail alive
-      if (moved > 0.6) {
-        pointer.moving = true;
-        pointer.lastMove = performance.now();
-      }
-
-      if (!follow.ready) {
-        follow.x = pointer.x;
-        follow.y = pointer.y;
-        follow.ready = true;
-        lastSampleX = pointer.x;
-        lastSampleY = pointer.y;
-      }
-    },
-    { passive: true }
-  );
+    if (!follow.ready) {
+      follow.x = x;
+      follow.y = y;
+      follow.ready = true;
+      lastSampleX = x;
+      lastSampleY = y;
+    }
+  };
 
   if (touchTrail) {
+    /* Touch uses touch events, not pointer events: the browser fires
+       pointercancel the moment a drag turns into a scroll, which killed the
+       tail during the one gesture people actually make. touchmove keeps
+       firing through the scroll. */
+    const anchorTo = (touch) => {
+      // start the tail at the finger so it never whips in from the last touch
+      pointer.x = touch.clientX;
+      pointer.y = touch.clientY;
+      pointer.active = true;
+      follow.x = pointer.x;
+      follow.y = pointer.y;
+      follow.ready = true;
+      lastSampleX = pointer.x;
+      lastSampleY = pointer.y;
+    };
+
     window.addEventListener(
-      "pointerdown",
+      "touchstart",
       (event) => {
-        // start the tail at the finger so it never whips in from the last touch
-        pointer.down = true;
-        pointer.active = true;
-        pointer.x = event.clientX;
-        pointer.y = event.clientY;
-        follow.x = pointer.x;
-        follow.y = pointer.y;
-        follow.ready = true;
-        lastSampleX = pointer.x;
-        lastSampleY = pointer.y;
+        const touch = event.touches[0];
+        if (touch) anchorTo(touch);
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "touchmove",
+      (event) => {
+        const touch = event.touches[0];
+        if (touch) trackPoint(touch.clientX, touch.clientY);
       },
       { passive: true }
     );
 
     const endTouch = () => {
-      pointer.down = false;
       pointer.active = false;
       pointer.moving = false;
     };
 
-    window.addEventListener("pointerup", endTouch, { passive: true });
-    window.addEventListener("pointercancel", endTouch, { passive: true });
+    window.addEventListener("touchend", endTouch, { passive: true });
+    window.addEventListener("touchcancel", endTouch, { passive: true });
   } else {
+    window.addEventListener(
+      "pointermove",
+      (event) => trackPoint(event.clientX, event.clientY),
+      { passive: true }
+    );
+
     document.addEventListener("pointerleave", () => {
       pointer.active = false;
       pointer.moving = false;

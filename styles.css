@@ -2509,22 +2509,24 @@ html.js [data-tilt].is-visible {
     -webkit-tap-highlight-color: transparent;
   }
 
-  .btn:active,
-  .nav-cta:active,
-  .back-to-top:active,
-  .back-to-top-link:active,
-  .capability-toggle:active,
-  .work-details summary:active {
+  /* :active is unreliable on touch, so script.js sets .is-pressed from the
+     touch events themselves. */
+  .btn.is-pressed,
+  .nav-cta.is-pressed,
+  .back-to-top.is-pressed,
+  .back-to-top-link.is-pressed,
+  .capability-toggle.is-pressed,
+  .work-details summary.is-pressed {
     transform: scale(0.95);
   }
 
-  .achievement-grid article:active,
-  .leadership-grid article:active,
-  .explore-grid article:active,
-  .skill-groups article:active,
-  .approach-steps li:active,
-  .stats article:active,
-  .edu-card:active {
+  .achievement-grid article.is-pressed,
+  .leadership-grid article.is-pressed,
+  .explore-grid article.is-pressed,
+  .skill-groups article.is-pressed,
+  .approach-steps li.is-pressed,
+  .stats article.is-pressed,
+  .edu-card.is-pressed {
     transform: scale(0.985);
     transition: transform 0.22s var(--ease);
   }
