@@ -131,14 +131,26 @@ main,
 }
 
 .logo {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.7rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(20, 34, 28, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.logo span {
-  color: var(--forest);
+.logo img {
+  width: 44px;
+  height: 44px;
+  display: block;
+  object-fit: cover;
+}
+
+.logo:hover,
+.logo:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(20, 34, 28, 0.16);
 }
 
 .site-nav {
