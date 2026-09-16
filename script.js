@@ -169,71 +169,94 @@ document.querySelector(".logo")?.addEventListener("click", (event) => {
   scrollToTop();
 });
 
-/* Stretchy sticky back-to-top: follows the cursor, elongates, then snaps back. */
+/* Back-to-top behaves like chewing gum: the button stays put while a blob of it
+   follows the cursor on a thinning neck, then snaps home once the neck breaks. */
 if (finePointer && !reducedMotion && backToTop) {
-  const CATCH = 180; // start stretching within this radius
-  const SNAP = 140; // release once pulled this far from the home center
-  const MAX_FOLLOW = 92; // how far the blob can travel with the cursor
-  const MAX_STRETCH = 2.25; // full elongation along the pull axis
+  const CATCH = 260; // cursor must come this close before the gum grabs on
+  const BREAK = 240; // neck snaps once the cursor is pulled this far out
+  const PULL_RATIO = 0.92; // how closely the blob tracks the cursor
+  const THICK = 44; // neck thickness at rest
+  const THIN = 11; // neck thickness when fully stretched
 
   let pointerX = 0;
   let pointerY = 0;
   let pulling = false;
-  let stretchFrame = 0;
-  let current = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
-  let target = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
+  let frame = 0;
+  let snapTimer = 0;
 
-  const applyStretch = () => {
-    backToTop.style.setProperty("--pull-x", `${current.x.toFixed(2)}px`);
-    backToTop.style.setProperty("--pull-y", `${current.y.toFixed(2)}px`);
-    backToTop.style.setProperty("--stretch", current.stretch.toFixed(3));
-    backToTop.style.setProperty("--squash", current.squash.toFixed(3));
-    backToTop.style.setProperty("--tilt", `${current.tilt.toFixed(2)}deg`);
+  const state = { x: 0, y: 0, angle: 0, length: 0, thickness: THICK, tip: 1 };
+  const target = { x: 0, y: 0, angle: 0, length: 0, thickness: THICK, tip: 1 };
+
+  const apply = () => {
+    backToTop.style.setProperty("--gum-x", `${state.x.toFixed(2)}px`);
+    backToTop.style.setProperty("--gum-y", `${state.y.toFixed(2)}px`);
+    backToTop.style.setProperty("--gum-angle", `${state.angle.toFixed(2)}deg`);
+    backToTop.style.setProperty("--gum-length", `${state.length.toFixed(2)}px`);
+    backToTop.style.setProperty("--gum-thickness", `${state.thickness.toFixed(2)}px`);
+    backToTop.style.setProperty("--gum-tip", state.tip.toFixed(3));
   };
 
-  const resetTarget = () => {
-    target = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
-  };
+  const tick = () => {
+    const ease = 0.24;
+    state.x += (target.x - state.x) * ease;
+    state.y += (target.y - state.y) * ease;
+    state.length += (target.length - state.length) * ease;
+    state.thickness += (target.thickness - state.thickness) * ease;
+    state.tip += (target.tip - state.tip) * ease;
+    state.angle = target.angle;
+    apply();
 
-  const tickStretch = () => {
-    const ease = pulling ? 0.22 : 0.28;
-    current.x += (target.x - current.x) * ease;
-    current.y += (target.y - current.y) * ease;
-    current.stretch += (target.stretch - current.stretch) * ease;
-    current.squash += (target.squash - current.squash) * ease;
-    current.tilt += (target.tilt - current.tilt) * ease;
-    applyStretch();
+    const atRest =
+      !pulling &&
+      Math.abs(state.x) < 0.2 &&
+      Math.abs(state.y) < 0.2 &&
+      Math.abs(state.length) < 0.3;
 
-    const settled =
-      Math.abs(current.x) < 0.15 &&
-      Math.abs(current.y) < 0.15 &&
-      Math.abs(current.stretch - 1) < 0.005 &&
-      !pulling;
-
-    if (settled) {
-      current = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
-      applyStretch();
-      backToTop.classList.remove("is-stretching", "is-snapping");
-      stretchFrame = 0;
+    if (atRest) {
+      state.x = 0;
+      state.y = 0;
+      state.length = 0;
+      state.thickness = THICK;
+      state.tip = 1;
+      apply();
+      frame = 0;
       return;
     }
 
-    stretchFrame = requestAnimationFrame(tickStretch);
+    frame = requestAnimationFrame(tick);
   };
 
-  const startStretchLoop = () => {
-    if (!stretchFrame) stretchFrame = requestAnimationFrame(tickStretch);
+  const startLoop = () => {
+    if (!frame) frame = requestAnimationFrame(tick);
   };
 
-  const updatePullFromPointer = () => {
+  const release = () => {
+    if (!pulling) return;
+    pulling = false;
+    target.x = 0;
+    target.y = 0;
+    target.length = 0;
+    target.thickness = THICK;
+    target.tip = 1;
+
+    // let CSS spring the snap-back, then hand control back to the rAF loop
+    backToTop.classList.add("is-snapping");
+    apply();
+    clearTimeout(snapTimer);
+    snapTimer = setTimeout(() => {
+      backToTop.classList.remove("is-snapping");
+      state.x = 0;
+      state.y = 0;
+      state.length = 0;
+      state.thickness = THICK;
+      state.tip = 1;
+      apply();
+    }, 520);
+  };
+
+  const updateFromPointer = () => {
     if (!backToTop.classList.contains("is-stuck")) {
-      if (pulling) {
-        pulling = false;
-        resetTarget();
-        backToTop.classList.remove("is-stretching");
-        backToTop.classList.add("is-snapping");
-        startStretchLoop();
-      }
+      release();
       return;
     }
 
@@ -244,37 +267,28 @@ if (finePointer && !reducedMotion && backToTop) {
     const dy = pointerY - cy;
     const dist = Math.hypot(dx, dy) || 0.0001;
 
-    if (dist > CATCH && !pulling) return;
-
-    if (dist > SNAP) {
-      if (pulling) {
-        pulling = false;
-        resetTarget();
-        backToTop.classList.remove("is-stretching");
-        backToTop.classList.add("is-snapping");
-        startStretchLoop();
-      }
+    if (!pulling && dist > CATCH) return;
+    if (dist > BREAK) {
+      release();
       return;
     }
 
-    pulling = true;
-    backToTop.classList.add("is-stretching");
-    backToTop.classList.remove("is-snapping");
+    if (!pulling) {
+      pulling = true;
+      backToTop.classList.remove("is-snapping");
+      clearTimeout(snapTimer);
+    }
 
-    const t = Math.min(dist / SNAP, 1);
-    // ease-out so the last stretch feels stronger / "fully stretched"
-    const eased = 1 - Math.pow(1 - t, 2.4);
-    const follow = Math.min(dist, MAX_FOLLOW) * (0.55 + eased * 0.35);
-    const nx = dx / dist;
-    const ny = dy / dist;
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const t = Math.min(dist / BREAK, 1);
+    const reach = dist * PULL_RATIO;
 
-    target.x = nx * follow;
-    target.y = ny * follow;
-    target.stretch = 1 + eased * (MAX_STRETCH - 1);
-    target.squash = 1 - eased * 0.42;
-    target.tilt = angle;
-    startStretchLoop();
+    target.angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    target.x = (dx / dist) * reach;
+    target.y = (dy / dist) * reach;
+    target.length = reach;
+    target.thickness = THICK - (THICK - THIN) * t;
+    target.tip = 1 - t * 0.42;
+    startLoop();
   };
 
   window.addEventListener(
@@ -282,23 +296,14 @@ if (finePointer && !reducedMotion && backToTop) {
     (event) => {
       pointerX = event.clientX;
       pointerY = event.clientY;
-      updatePullFromPointer();
+      updateFromPointer();
     },
     { passive: true }
   );
 
-  window.addEventListener("pointerleave", () => {
-    if (!pulling) return;
-    pulling = false;
-    resetTarget();
-    backToTop.classList.remove("is-stretching");
-    backToTop.classList.add("is-snapping");
-    startStretchLoop();
-  });
-
-  backToTop.addEventListener("pointerleave", () => {
-    // keep stretching while still inside the catch radius; snap only if already far
-  });
+  window.addEventListener("blur", release);
+  document.addEventListener("pointerleave", release);
+  window.addEventListener("scroll", updateFromPointer, { passive: true });
 }
 
 /* ---------- navigation ---------- */
