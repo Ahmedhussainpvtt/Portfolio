@@ -7,6 +7,73 @@
    ======================================================================= */
 const OPEN_TO_WORK = false;
 
+/* Local theme picker: shows on localhost / 127.0.0.1, or anywhere with ?themes=1.
+   Click a swatch, live-preview, then tell me which one to lock in. */
+const THEMES = [
+  { id: "current", label: "Current", a: "#0f6c85", b: "#bd8b52" },
+  { id: "ocean", label: "Ocean", a: "#0a7ea4", b: "#4f8fa8" },
+  { id: "cobalt", label: "Cobalt", a: "#1d4ed8", b: "#60a5fa" },
+  { id: "emerald", label: "Emerald", a: "#0f766e", b: "#2dd4bf" },
+  { id: "cyan", label: "Cyan", a: "#0891b2", b: "#22d3ee" },
+  { id: "slate", label: "Slate", a: "#475569", b: "#94a3b8" },
+  { id: "indigo", label: "Indigo", a: "#4f46e5", b: "#a5b4fc" },
+  { id: "forest", label: "Forest", a: "#166534", b: "#86efac" },
+  { id: "coral", label: "Coral", a: "#e11d48", b: "#fb7185" },
+  { id: "midnight", label: "Midnight", a: "#38bdf8", b: "#0b1220" },
+];
+
+const themeBar = document.getElementById("theme-bar");
+const themeSwatches = document.getElementById("theme-swatches");
+const showThemeBar =
+  /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ||
+  new URLSearchParams(location.search).has("themes");
+
+const applyTheme = (id) => {
+  const theme = THEMES.find((item) => item.id === id) || THEMES[0];
+
+  if (theme.id === "current") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", theme.id);
+  }
+
+  localStorage.setItem("portfolio-theme", theme.id);
+
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    meta.setAttribute(
+      "content",
+      getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()
+    );
+  }
+
+  themeSwatches?.querySelectorAll(".theme-swatch").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.theme === theme.id);
+  });
+
+  // let canvas effects re-read accent colours on the next frame
+  window.dispatchEvent(new CustomEvent("themechange"));
+};
+
+if (showThemeBar && themeBar && themeSwatches) {
+  document.documentElement.classList.add("has-theme-bar");
+  themeBar.hidden = false;
+
+  THEMES.forEach((theme) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-swatch";
+    btn.dataset.theme = theme.id;
+    btn.setAttribute("role", "option");
+    btn.setAttribute("aria-label", theme.label);
+    btn.innerHTML = `<span class="theme-swatch-dot" style="--swatch-a:${theme.a};--swatch-b:${theme.b}"></span><span>${theme.label}</span>`;
+    btn.addEventListener("click", () => applyTheme(theme.id));
+    themeSwatches.appendChild(btn);
+  });
+
+  applyTheme(localStorage.getItem("portfolio-theme") || "current");
+}
+
 const header = document.querySelector(".site-header");
 const toggle = document.querySelector(".nav-toggle");
 const nav = document.querySelector(".site-nav");
@@ -819,8 +886,26 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     });
   }
 
+  const readAccents = () => {
+    const styles = getComputedStyle(document.documentElement);
+    const teal = styles.getPropertyValue("--teal").trim() || "#0f6c85";
+    const amber = styles.getPropertyValue("--amber").trim() || "#bd8b52";
+    const tealRgb = (styles.getPropertyValue("--teal-rgb").trim() || "15, 108, 133")
+      .split(",")
+      .map((n) => Number(n.trim()));
+    const amberRgb = (styles.getPropertyValue("--amber-rgb").trim() || "189, 139, 82")
+      .split(",")
+      .map((n) => Number(n.trim()));
+    return { teal, amber, tealRgb, amberRgb };
+  };
+
+  let accents = readAccents();
+  window.addEventListener("themechange", () => {
+    accents = readAccents();
+  });
+
   burstAt = (x, y) => {
-    const colors = ["#0f6c85", "#bd8b52", "#2f9ab5", "#e3c9a3"];
+    const colors = [accents.teal, accents.amber, accents.teal, accents.amber];
     for (let i = 0; i < 46; i += 1) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 5.5 + 1.8;
@@ -850,7 +935,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
 
       bgCtx.beginPath();
       bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      bgCtx.fillStyle = `rgba(15, 108, 133, ${p.a})`;
+      bgCtx.fillStyle = `rgba(${accents.tealRgb.join(",")}, ${p.a})`;
       bgCtx.fill();
     });
 
@@ -864,7 +949,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
         bgCtx.beginPath();
         bgCtx.moveTo(particles[i].x, particles[i].y);
         bgCtx.lineTo(particles[j].x, particles[j].y);
-        bgCtx.strokeStyle = `rgba(15, 108, 133, ${(1 - dist / 130) * 0.09})`;
+        bgCtx.strokeStyle = `rgba(${accents.tealRgb.join(",")}, ${(1 - dist / 130) * 0.09})`;
         bgCtx.lineWidth = 1;
         bgCtx.stroke();
       }
@@ -885,13 +970,19 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
 
     for (let i = 1; i < trail.length; i += 1) {
       const t = i / trail.length;
+      const r = Math.round(
+        accents.tealRgb[0] + (accents.amberRgb[0] - accents.tealRgb[0]) * t
+      );
+      const g = Math.round(
+        accents.tealRgb[1] + (accents.amberRgb[1] - accents.tealRgb[1]) * t
+      );
+      const b = Math.round(
+        accents.tealRgb[2] + (accents.amberRgb[2] - accents.tealRgb[2]) * t
+      );
       fxCtx.beginPath();
       fxCtx.moveTo(trail[i - 1].x, trail[i - 1].y);
       fxCtx.lineTo(trail[i].x, trail[i].y);
-      // tail fades from teal into the bronze head
-      fxCtx.strokeStyle = `rgba(${Math.round(15 + t * 174)}, ${Math.round(
-        108 + t * 31
-      )}, ${Math.round(133 - t * 51)}, ${t * 0.55})`;
+      fxCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${t * 0.55})`;
       fxCtx.lineWidth = t * 7;
       fxCtx.lineCap = "round";
       fxCtx.lineJoin = "round";
@@ -901,11 +992,11 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     const head = trail[trail.length - 1];
     if (head && pointer.active && trail.length > 1) {
       fxCtx.save();
-      fxCtx.shadowColor = "rgba(189, 139, 82, 0.85)";
+      fxCtx.shadowColor = `rgba(${accents.amberRgb.join(",")}, 0.85)`;
       fxCtx.shadowBlur = 12;
       fxCtx.beginPath();
       fxCtx.arc(head.x, head.y, 4, 0, Math.PI * 2);
-      fxCtx.fillStyle = "rgba(189, 139, 82, 0.9)";
+      fxCtx.fillStyle = `rgba(${accents.amberRgb.join(",")}, 0.9)`;
       fxCtx.fill();
       fxCtx.restore();
     }
