@@ -169,14 +169,14 @@ document.querySelector(".logo")?.addEventListener("click", (event) => {
   scrollToTop();
 });
 
-/* Back-to-top behaves like chewing gum: the button stays put while a blob of it
-   follows the cursor on a thinning neck, then snaps home once the neck breaks. */
+/* Back-to-top behaves like chewing gum: the button stays anchored while its body
+   stretches out towards the cursor, then snaps home once pulled past BREAK. */
 if (finePointer && !reducedMotion && backToTop) {
-  const CATCH = 260; // cursor must come this close before the gum grabs on
-  const BREAK = 240; // neck snaps once the cursor is pulled this far out
-  const PULL_RATIO = 0.92; // how closely the blob tracks the cursor
-  const THICK = 44; // neck thickness at rest
-  const THIN = 11; // neck thickness when fully stretched
+  const CATCH = 470; // cursor must come this close before the gum grabs on
+  const BREAK = 430; // shape snaps home once pulled this far out
+  const PULL_RATIO = 0.95; // how closely the far end tracks the cursor
+  const THICK = 50; // body thickness at rest
+  const THIN = 29; // body thickness when fully stretched
 
   let pointerX = 0;
   let pointerY = 0;
@@ -184,40 +184,28 @@ if (finePointer && !reducedMotion && backToTop) {
   let frame = 0;
   let snapTimer = 0;
 
-  const state = { x: 0, y: 0, angle: 0, length: 0, thickness: THICK, tip: 1 };
-  const target = { x: 0, y: 0, angle: 0, length: 0, thickness: THICK, tip: 1 };
+  const rest = () => ({ angle: 0, length: 0, thickness: THICK });
+
+  let state = rest();
+  let target = rest();
 
   const apply = () => {
-    backToTop.style.setProperty("--gum-x", `${state.x.toFixed(2)}px`);
-    backToTop.style.setProperty("--gum-y", `${state.y.toFixed(2)}px`);
     backToTop.style.setProperty("--gum-angle", `${state.angle.toFixed(2)}deg`);
     backToTop.style.setProperty("--gum-length", `${state.length.toFixed(2)}px`);
     backToTop.style.setProperty("--gum-thickness", `${state.thickness.toFixed(2)}px`);
-    backToTop.style.setProperty("--gum-tip", state.tip.toFixed(3));
   };
 
   const tick = () => {
     const ease = 0.24;
-    state.x += (target.x - state.x) * ease;
-    state.y += (target.y - state.y) * ease;
     state.length += (target.length - state.length) * ease;
     state.thickness += (target.thickness - state.thickness) * ease;
-    state.tip += (target.tip - state.tip) * ease;
     state.angle = target.angle;
     apply();
 
-    const atRest =
-      !pulling &&
-      Math.abs(state.x) < 0.2 &&
-      Math.abs(state.y) < 0.2 &&
-      Math.abs(state.length) < 0.3;
+    const atRest = !pulling && Math.abs(state.length) < 0.3;
 
     if (atRest) {
-      state.x = 0;
-      state.y = 0;
-      state.length = 0;
-      state.thickness = THICK;
-      state.tip = 1;
+      state = rest();
       apply();
       frame = 0;
       return;
@@ -233,23 +221,16 @@ if (finePointer && !reducedMotion && backToTop) {
   const release = () => {
     if (!pulling) return;
     pulling = false;
-    target.x = 0;
-    target.y = 0;
-    target.length = 0;
-    target.thickness = THICK;
-    target.tip = 1;
+    target = rest();
 
     // let CSS spring the snap-back, then hand control back to the rAF loop
     backToTop.classList.add("is-snapping");
+    state = rest();
     apply();
     clearTimeout(snapTimer);
     snapTimer = setTimeout(() => {
       backToTop.classList.remove("is-snapping");
-      state.x = 0;
-      state.y = 0;
-      state.length = 0;
-      state.thickness = THICK;
-      state.tip = 1;
+      state = rest();
       apply();
     }, 520);
   };
@@ -283,11 +264,10 @@ if (finePointer && !reducedMotion && backToTop) {
     const reach = dist * PULL_RATIO;
 
     target.angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    target.x = (dx / dist) * reach;
-    target.y = (dy / dist) * reach;
-    target.length = reach;
+    // stays thick so the whole thing reads as one stretched button, not a string
     target.thickness = THICK - (THICK - THIN) * t;
-    target.tip = 1 - t * 0.42;
+    // the band's own rounded cap forms the far end, so extend past the cursor
+    target.length = reach + target.thickness / 2;
     startLoop();
   };
 

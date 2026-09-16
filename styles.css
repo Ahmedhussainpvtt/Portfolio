@@ -1937,12 +1937,9 @@ main,
 
 .back-to-top {
   /* gum pull state, driven by script.js */
-  --gum-x: 0px;
-  --gum-y: 0px;
   --gum-angle: 0deg;
   --gum-length: 0px;
-  --gum-thickness: 44px;
-  --gum-tip: 1;
+  --gum-thickness: 50px;
   position: fixed;
   right: 1.2rem;
   bottom: 1.4rem;
@@ -1982,8 +1979,7 @@ main,
 }
 
 .gum-core,
-.gum-neck,
-.gum-tip {
+.gum-neck {
   position: absolute;
   background: var(--ink);
   transition: background 0.3s ease;
@@ -2006,19 +2002,7 @@ main,
   will-change: width, height, transform;
 }
 
-.gum-tip {
-  left: 50%;
-  top: 50%;
-  width: 50px;
-  height: 50px;
-  margin: -25px 0 0 -25px;
-  border-radius: 999px;
-  transform: translate3d(var(--gum-x), var(--gum-y), 0) scale(var(--gum-tip));
-  will-change: transform;
-}
-
-.back-to-top.is-snapping .gum-neck,
-.back-to-top.is-snapping .gum-tip {
+.back-to-top.is-snapping .gum-neck {
   transition: width 0.5s cubic-bezier(0.2, 1.5, 0.4, 1),
     height 0.5s cubic-bezier(0.2, 1.5, 0.4, 1),
     transform 0.5s cubic-bezier(0.2, 1.5, 0.4, 1), background 0.3s ease;
@@ -2055,10 +2039,8 @@ main,
 
 .back-to-top:hover .gum-core,
 .back-to-top:hover .gum-neck,
-.back-to-top:hover .gum-tip,
 .back-to-top:focus-visible .gum-core,
-.back-to-top:focus-visible .gum-neck,
-.back-to-top:focus-visible .gum-tip {
+.back-to-top:focus-visible .gum-neck {
   background: var(--teal);
 }
 
