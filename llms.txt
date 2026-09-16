@@ -1,23 +1,41 @@
 # Mohammed Ahmed Hussain
 
-> Product Sales & Operations professional in Hyderabad, Telangana, India. 5+ years across technology sales, AI solutions, SaaS, customer success, and business operations. Works closely with C-level executives and VPs.
+> Product Sales & Operations | AI & Automation | SaaS
+> Hyderabad, Telangana, India
 
-Mohammed Ahmed Hussain (also known as Ahmed Hussain) helps teams turn messy sales and operations work into clear, working systems. Strengths include solution selling, demos, onboarding and go-live, AI agents and automation, revenue operations, process optimization, and training.
+Mohammed Ahmed Hussain (also known as Ahmed Hussain) turns AI products and complex business problems into revenue, scalable operations, and customer outcomes.
+
+He works at the intersection of Sales, Product, AI, Operations, and Customer Success — from product demonstrations and customer acquisition to onboarding, automation, product testing, and operational improvement.
+
+## Positioning
+
+- Product Sales & Operations
+- AI & Automation
+- SaaS / GTM / Revenue Operations
+- Customer Success & Onboarding
+- Business Operations
+
+Not a software engineer or AI engineer. Business + technology operator who partners with leadership, customers, sales, and product/technical teams.
 
 ## Profile
 
-- [Portfolio home](https://ahmedhussain.in/): Full interactive portfolio with experience, capabilities, leadership, and contact
-- [Full profile (Markdown)](https://ahmedhussain.in/profile.md): Clean LLM-friendly summary of background, skills, and contact details
-- [Resume (PDF)](https://ahmedhussain.in/Ahmed%20Resume.pdf): Downloadable resume
+- [Portfolio](https://ahmedhussain.in/): Full interactive portfolio
+- [Markdown profile](https://ahmedhussain.in/profile.md): LLM-friendly summary
+- [Resume PDF](https://ahmedhussain.in/Ahmed%20Resume.pdf): Downloadable resume
+- [LinkedIn](https://www.linkedin.com/in/ahmedhussainpvt/): Professional network profile
+
+## Experience highlight
+
+**Product Sales & Operations Manager · ContactSwing AI (Core Team)**  
+Owns work across sales, product demos, AI workflows, customer onboarding, go-live, account support, internal automation, team training, and direct partnership with CEO / CTO / VP leadership.
 
 ## Contact
 
-- [Email](mailto:mahhussain123@gmail.com): mahhussain123@gmail.com
-- [Phone](tel:+919381107468): +91 93811 07468
-- [LinkedIn](https://www.linkedin.com/in/ahmedhussainpvt/): Professional profile
+- Email: [mahhussain123@gmail.com](mailto:mahhussain123@gmail.com)
+- Phone: [+91 93811 07468](tel:+919381107468)
 - Location: Hyderabad, Telangana, India
 
-## Optional
+## Crawl / index
 
-- [Sitemap](https://ahmedhussain.in/sitemap.xml): Search engine sitemap
-- [robots.txt](https://ahmedhussain.in/robots.txt): Crawler access rules
+- [Sitemap](https://ahmedhussain.in/sitemap.xml)
+- [robots.txt](https://ahmedhussain.in/robots.txt)

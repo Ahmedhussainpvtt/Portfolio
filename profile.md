@@ -1,28 +1,51 @@
 # Mohammed Ahmed Hussain
 
-Product Sales & Operations Manager · Hyderabad, Telangana, India
+**Product Sales & Operations | AI & Automation | SaaS**  
+Hyderabad, Telangana, India
 
 ## Summary
 
-Sales and operations professional with 5+ years of experience in technology sales, AI solutions, SaaS products, customer success, and business operations. Works closely with C-level stakeholders and VPs. Hands-on with AI agents, automation, CRM platforms, technical integrations, product testing, and process optimization.
+Product Sales & Operations professional with 5+ years across technology sales, AI solutions, SaaS, customer success, business operations, and process improvement.
 
-Focus: turn complicated workflows into practical systems people keep using.
+Work sits between business and technology: partnering with leadership, customers, sales teams, and product/technical teams to demonstrate solutions, improve products, streamline operations, and turn complex workflows into practical systems.
 
-## Capabilities
+Hands-on across AI agents, automation, SaaS products, customer onboarding, product testing, sales operations, team training, and cross-functional execution.
 
-1. Solution selling & demos
-2. Onboarding & go-live
-3. AI agents & automation
-4. Revenue & sales operations
-5. Process optimization
-6. Training & enablement
+## What I bring
+
+- **Revenue mindset** — positioning, demos, selling, and adoption
+- **Product thinking** — customer needs into product improvements
+- **AI & automation** — efficient workflows with AI and integrations
+- **Operational execution** — processes, documentation, scalable systems
+- **Leadership & collaboration** — across sales, product, technical, and customer teams
+
+## Selected work themes
+
+1. AI SaaS product operations (ContactSwing AI)
+2. Sales & revenue operations
+3. Business automation
+4. Customer onboarding & implementation
 
 ## Skills
 
-- Sales & growth: end-to-end sales cycle, outbound strategy, email & LinkedIn outreach, CRM & HubSpot, Google Ads, Facebook Ads, SEO, email marketing
-- Ops & platforms: AI voice workflows, customer onboarding, Twilio, DNS, Zapier, AWS, GCP, Webflow, WordPress
-- Talent & delivery: talent acquisition leadership, technical recruiting, Handshake ATS, team coaching, vendor & client relations
-- Tools: Google Workspace, Microsoft Office, product testing & QA; familiar with Java, .NET, Python
+### Product & revenue
+Product sales, SaaS sales, solution selling, product demonstrations, customer success, revenue operations, CRM & HubSpot, outbound strategy
+
+### AI & automation
+AI agents, voice AI, workflow automation, LLM applications, process automation, AI product testing, Zapier, AI voice workflows
+
+### Operations
+Customer onboarding, process improvement, SOP development, KPI management, team training, cross-functional operations
+
+### Technology
+CRM, APIs & integrations, AWS & GCP, automation platforms, product QA, business systems, Twilio & DNS, Google Workspace
+
+## Current role
+
+**Product Sales & Operations Manager**  
+ContactSwing AI · Core Team · Jan 2024 – Present · Hyderabad
+
+Responsibilities include product demos and discovery, onboarding and go-live, account management, outbound/sales support, AI product testing, translating customer feedback into product improvements, coordinating with product/technical teams, building automations, training sales teammates, and working with CEO / CTO / VP leadership.
 
 ## Contact
 
