@@ -1988,67 +1988,6 @@ main,
   display: none;
 }
 
-/* ---------- section index HUD ---------- */
-
-.section-index {
-  position: fixed;
-  left: max(1rem, calc((100vw - var(--max)) / 2 - 4.5rem));
-  top: 50%;
-  z-index: 28;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-  pointer-events: none;
-  transform: translate3d(0, -50%, 0);
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.section-index.is-on {
-  opacity: 1;
-}
-
-.section-index-label {
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.section-index-num {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(2.4rem, 3.4vw, 3.2rem);
-  font-weight: 600;
-  line-height: 1;
-  color: var(--teal);
-  letter-spacing: -0.03em;
-  display: inline-block;
-  will-change: transform, opacity, filter;
-}
-
-.section-index-num.is-enter {
-  animation: stage-num-in 0.75s var(--ease) both;
-}
-
-@keyframes stage-num-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.86);
-    filter: blur(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-
-[data-stage].is-stage-active {
-  position: relative;
-}
-
 /* ---------- reveal system ---------- */
 
 html.js [data-reveal] {
@@ -2259,10 +2198,6 @@ html.js [data-tilt].is-visible {
     display: none;
   }
 
-  .section-index {
-    display: none;
-  }
-
   html.js [data-reveal] {
     transform: translate3d(0, 16px, 0) scale(0.992);
     filter: blur(3px);
@@ -2340,8 +2275,7 @@ html.js [data-tilt].is-visible {
 
   .cursor-glow,
   .fx-canvas,
-  .scroll-cue-dot,
-  .section-index {
+  .scroll-cue-dot {
     display: none;
   }
 

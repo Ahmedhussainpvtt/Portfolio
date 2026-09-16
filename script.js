@@ -41,26 +41,13 @@ const sections = navLinks
   .map((link) => document.querySelector(link.getAttribute("href")))
   .filter(Boolean);
 
-const stageSections = [...document.querySelectorAll("[data-stage]")];
-const sectionIndex = document.getElementById("section-index");
-const sectionIndexNum = document.getElementById("section-index-num");
 const aurora = document.querySelector(".aurora");
 
 let scrollQueued = false;
-let activeStage = null;
 let lenis = null;
 
 const prefersFineDesktop =
   finePointer && window.matchMedia("(min-width: 981px)").matches;
-
-const setStageNumber = (label) => {
-  if (!sectionIndexNum || !label || sectionIndexNum.textContent === label) return;
-  sectionIndexNum.textContent = label;
-  sectionIndexNum.classList.remove("is-enter");
-  // force a reflow so the enter animation restarts cleanly
-  void sectionIndexNum.offsetWidth;
-  sectionIndexNum.classList.add("is-enter");
-};
 
 const updateOnScroll = () => {
   scrollQueued = false;
@@ -87,24 +74,6 @@ const updateOnScroll = () => {
     const isActive = Boolean(current) && link.getAttribute("href") === `#${current.id}`;
     link.classList.toggle("active", isActive);
   });
-
-  // stage number + active section (for cinematic section markers)
-  let stage = stageSections[0] || null;
-  const stageLine = window.innerHeight * 0.42;
-  stageSections.forEach((section) => {
-    if (section.getBoundingClientRect().top <= stageLine) stage = section;
-  });
-
-  if (stage && stage !== activeStage) {
-    if (activeStage) activeStage.classList.remove("is-stage-active");
-    stage.classList.add("is-stage-active");
-    activeStage = stage;
-    setStageNumber(stage.dataset.stageLabel || "");
-  }
-
-  if (sectionIndex) {
-    sectionIndex.classList.toggle("is-on", y > window.innerHeight * 0.55);
-  }
 
   // very light background parallax (transform only)
   if (aurora && !reducedMotion && prefersFineDesktop) {
