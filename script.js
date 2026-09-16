@@ -430,6 +430,27 @@ if ("IntersectionObserver" in window && !reducedMotion) {
   revealEls.forEach((el) => el.classList.add("is-visible"));
 }
 
+/* Section seams draw outward once and stay, so scrolling back up does not
+   rewind a divider the reader has already passed. */
+const seamSections = [...document.querySelectorAll(".section")];
+
+if ("IntersectionObserver" in window && !reducedMotion) {
+  const seamObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting && entry.boundingClientRect.bottom >= 0) return;
+        entry.target.classList.add("is-seamed");
+        seamObserver.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12% 0px" }
+  );
+
+  seamSections.forEach((section) => seamObserver.observe(section));
+} else {
+  seamSections.forEach((section) => section.classList.add("is-seamed"));
+}
+
 /* ---------- split headings ---------- */
 
 /* Wrap every heading word in a clipped box so the words can rise one after the

@@ -234,6 +234,85 @@ ol {
   }
 }
 
+/* Outline shapes parked in the page margins. The layer spans the document so
+   they scroll past with the content, and clips so they can never widen it. */
+.decor-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.deco {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.deco-ring-1,
+.deco-ring-2 {
+  border: 1px solid rgba(var(--teal-rgb), 0.22);
+  border-radius: 50%;
+}
+
+.deco-ring-1 {
+  width: 190px;
+  height: 190px;
+  top: 14%;
+  right: -60px;
+  animation: deco-float-a 26s ease-in-out infinite;
+}
+
+.deco-ring-2 {
+  width: 110px;
+  height: 110px;
+  top: 41%;
+  left: -34px;
+  animation: deco-float-b 31s ease-in-out infinite;
+}
+
+.deco-square {
+  width: 120px;
+  height: 120px;
+  top: 63%;
+  right: 3vw;
+  border: 1px solid rgba(var(--amber-rgb), 0.16);
+  border-radius: 28px;
+  animation: deco-spin 44s linear infinite;
+}
+
+/* a thin plus mark, drawn from two crossed gradients */
+.deco-cross {
+  width: 46px;
+  height: 46px;
+  top: 84%;
+  left: 5vw;
+  background: linear-gradient(rgba(var(--teal-rgb), 0.3), rgba(var(--teal-rgb), 0.3))
+      center / 1px 100% no-repeat,
+    linear-gradient(rgba(var(--teal-rgb), 0.3), rgba(var(--teal-rgb), 0.3)) center /
+      100% 1px no-repeat;
+  animation: deco-float-b 19s ease-in-out infinite;
+}
+
+@keyframes deco-float-a {
+  50% {
+    transform: translate3d(-24px, 30px, 0) rotate(8deg);
+  }
+}
+
+@keyframes deco-float-b {
+  50% {
+    transform: translate3d(20px, -26px, 0) rotate(-10deg);
+  }
+}
+
+@keyframes deco-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .grain {
   pointer-events: none;
   position: fixed;
@@ -1039,6 +1118,89 @@ main,
   scroll-margin-top: 88px;
 }
 
+/* Hairline seam with a lit centre dot, drawn outward as the section arrives.
+   Both marks live in one pseudo-element so .section needs no positioning. */
+.section::before {
+  content: "";
+  display: block;
+  height: 9px;
+  width: min(100%, 720px);
+  margin: 0 auto 4.2rem;
+  transition: transform 1.2s var(--ease), opacity 0.8s ease;
+  background: linear-gradient(
+        90deg,
+        transparent,
+        var(--line) 22%,
+        var(--line) 78%,
+        transparent
+      )
+      center / 100% 1px no-repeat,
+    radial-gradient(circle, var(--teal) 0 2.5px, transparent 3px) center / 100% 100%
+      no-repeat;
+}
+
+/* only hidden up front when scripting can draw it back in */
+html.js .section::before {
+  transform: scaleX(0.15);
+  opacity: 0;
+}
+
+html.js .section.is-seamed::before {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Blueprint patch: a faint measured grid, masked to a soft circle so it reads
+   as texture in the margin rather than a panel with edges. */
+.capability,
+.approach {
+  position: relative;
+}
+
+.capability::after,
+.approach::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 330px;
+  height: 330px;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgba(var(--teal-rgb), 0.17) 0 1px,
+      transparent 1px 46px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(var(--teal-rgb), 0.17) 0 1px,
+      transparent 1px 46px
+    );
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000, transparent 68%);
+  mask-image: radial-gradient(circle at 50% 50%, #000, transparent 68%);
+}
+
+.capability::after {
+  top: 7rem;
+  right: -70px;
+}
+
+.approach::after {
+  bottom: -40px;
+  left: -80px;
+}
+
+/* leading tick, pairing with the trailing rule below */
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 1px;
+  margin-right: 0.65rem;
+  vertical-align: middle;
+  background: var(--teal);
+  opacity: 0.85;
+}
+
 .section-heading .eyebrow::after {
   content: "";
   display: inline-block;
@@ -1324,6 +1486,39 @@ main,
   border-radius: 22px;
   transition: box-shadow 0.4s ease, border-color 0.4s ease,
     background 0.4s ease, transform 0.35s var(--ease);
+}
+
+/* Corner ticks, drawn as eight hairline slivers pinned to the four corners.
+   They sit at low opacity and brighten with the card. */
+.skill-groups article::before,
+.achievement-grid article::before,
+.leadership-grid article::before,
+.explore-grid article::before,
+.approach-steps li::before {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+  --tick: linear-gradient(rgba(var(--teal-rgb), 0.85), rgba(var(--teal-rgb), 0.85));
+  background: var(--tick) top left / 13px 1px no-repeat,
+    var(--tick) top left / 1px 13px no-repeat,
+    var(--tick) top right / 13px 1px no-repeat,
+    var(--tick) top right / 1px 13px no-repeat,
+    var(--tick) bottom left / 13px 1px no-repeat,
+    var(--tick) bottom left / 1px 13px no-repeat,
+    var(--tick) bottom right / 13px 1px no-repeat,
+    var(--tick) bottom right / 1px 13px no-repeat;
+}
+
+.skill-groups article:hover::before,
+.achievement-grid article:hover::before,
+.leadership-grid article:hover::before,
+.explore-grid article:hover::before,
+.approach-steps li:hover::before {
+  opacity: 1;
 }
 
 .skill-groups article:hover,
@@ -2556,10 +2751,15 @@ html.js [data-tilt].is-visible {
   html.js .section-heading h2.is-split .rise,
   html.js .section-heading h2.is-split .word,
   html.js [data-reveal],
-  html.js [data-reveal="mask"] {
+  html.js [data-reveal="mask"],
+  html.js .section::before {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+
+  .deco {
+    animation: none;
   }
 
   .cursor-glow,
