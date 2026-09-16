@@ -766,6 +766,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   let width = 0;
   let height = 0;
   let particles = [];
+  let linkDist = 130;
   let sparks = [];
   const trail = [];
   const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0, down: false };
@@ -791,7 +792,13 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
       canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
     });
 
-    const count = width < 760 ? 0 : Math.min(58, Math.round(width / 26));
+    // Linking every pair is O(n^2), so phones get a thinner field and a
+    // shorter link reach rather than no field at all.
+    const narrow = width < 760;
+    linkDist = narrow ? 104 : 130;
+    const count = narrow
+      ? Math.min(24, Math.round(width / 18))
+      : Math.min(58, Math.round(width / 26));
     particles = Array.from({ length: count }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -926,12 +933,12 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
         const dx = particles[i].x - particles[j].x;
         const dy = particles[i].y - particles[j].y;
         const dist = Math.hypot(dx, dy);
-        if (dist > 130) continue;
+        if (dist > linkDist) continue;
 
         bgCtx.beginPath();
         bgCtx.moveTo(particles[i].x, particles[i].y);
         bgCtx.lineTo(particles[j].x, particles[j].y);
-        bgCtx.strokeStyle = `rgba(${accents.tealRgb.join(",")}, ${(1 - dist / 130) * 0.09})`;
+        bgCtx.strokeStyle = `rgba(${accents.tealRgb.join(",")}, ${(1 - dist / linkDist) * 0.09})`;
         bgCtx.lineWidth = 1;
         bgCtx.stroke();
       }
