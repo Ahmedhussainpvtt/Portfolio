@@ -779,6 +779,12 @@ main,
   overflow-wrap: anywhere;
 }
 
+.lede-support {
+  margin-top: 0.85rem;
+  font-size: 0.98rem;
+  opacity: 0.92;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1168,6 +1174,76 @@ main,
   margin: 0.35rem 0 0.9rem;
 }
 
+.role-label {
+  margin: 1.1rem 0 0.55rem;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.own-areas {
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line);
+}
+
+.own-areas h4 {
+  margin: 0 0 0.45rem;
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.own-areas p {
+  margin: 0;
+  color: var(--teal-deep);
+  font-weight: 500;
+  max-width: none;
+}
+
+.work-details {
+  margin-top: 0.85rem;
+}
+
+.work-details summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--teal);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.work-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.work-details summary::after {
+  content: "→";
+  transition: transform 0.25s var(--ease);
+}
+
+.work-details[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.work-details summary:hover,
+.work-details summary:focus-visible {
+  color: var(--teal-deep);
+}
+
+.work-details p {
+  margin-top: 0.7rem;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+
 .what p {
   color: var(--ink-soft);
   max-width: 62ch;
@@ -1532,6 +1608,11 @@ main,
   margin: 1rem auto 1.8rem;
   color: var(--ink-soft);
   font-weight: 300;
+}
+
+.pitch-panel p strong {
+  color: var(--ink);
+  font-weight: 500;
 }
 
 /* ---------- education ---------- */
