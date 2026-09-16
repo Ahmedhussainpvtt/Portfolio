@@ -768,7 +768,13 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   let particles = [];
   let sparks = [];
   const trail = [];
-  const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0 };
+  const pointer = { x: 0, y: 0, active: false, moving: false, lastMove: 0, down: false };
+  // Touch has no hovering position, so the tail rides finger drags instead.
+  // It samples wider apart there: the hand covers the tip, so the ribbon needs
+  // to reach further back to stay visible without costing more points.
+  const touchTrail = !finePointer;
+  const TRAIL_MAX = touchTrail ? 52 : 56;
+  const TRAIL_STEP = touchTrail ? 4.5 : 2.5;
   const follow = { x: 0, y: 0, ready: false };
   let lastSampleX = 0;
   let lastSampleY = 0;
@@ -799,35 +805,63 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
   resize();
   window.addEventListener("resize", resize);
 
-  if (finePointer) {
-    window.addEventListener(
-      "pointermove",
-      (event) => {
-        const dx = event.clientX - pointer.x;
-        const dy = event.clientY - pointer.y;
-        const moved = Math.hypot(dx, dy);
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      if (touchTrail && !pointer.down) return;
 
+      const dx = event.clientX - pointer.x;
+      const dy = event.clientY - pointer.y;
+      const moved = Math.hypot(dx, dy);
+
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.active = true;
+
+      // ignore micro jitter so a resting cursor does not keep a tail alive
+      if (moved > 0.6) {
+        pointer.moving = true;
+        pointer.lastMove = performance.now();
+      }
+
+      if (!follow.ready) {
+        follow.x = pointer.x;
+        follow.y = pointer.y;
+        follow.ready = true;
+        lastSampleX = pointer.x;
+        lastSampleY = pointer.y;
+      }
+    },
+    { passive: true }
+  );
+
+  if (touchTrail) {
+    window.addEventListener(
+      "pointerdown",
+      (event) => {
+        // start the tail at the finger so it never whips in from the last touch
+        pointer.down = true;
+        pointer.active = true;
         pointer.x = event.clientX;
         pointer.y = event.clientY;
-        pointer.active = true;
-
-        // ignore micro jitter so a resting cursor does not keep a tail alive
-        if (moved > 0.6) {
-          pointer.moving = true;
-          pointer.lastMove = performance.now();
-        }
-
-        if (!follow.ready) {
-          follow.x = pointer.x;
-          follow.y = pointer.y;
-          follow.ready = true;
-          lastSampleX = pointer.x;
-          lastSampleY = pointer.y;
-        }
+        follow.x = pointer.x;
+        follow.y = pointer.y;
+        follow.ready = true;
+        lastSampleX = pointer.x;
+        lastSampleY = pointer.y;
       },
       { passive: true }
     );
 
+    const endTouch = () => {
+      pointer.down = false;
+      pointer.active = false;
+      pointer.moving = false;
+    };
+
+    window.addEventListener("pointerup", endTouch, { passive: true });
+    window.addEventListener("pointercancel", endTouch, { passive: true });
+  } else {
     document.addEventListener("pointerleave", () => {
       pointer.active = false;
       pointer.moving = false;
@@ -919,7 +953,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
       const dist = Math.hypot(dx, dy);
 
       if (dist > 0.8) {
-        const steps = Math.max(1, Math.ceil(dist / 2.5));
+        const steps = Math.max(1, Math.ceil(dist / TRAIL_STEP));
         for (let s = 1; s <= steps; s += 1) {
           trail.push({
             x: lastSampleX + (dx * s) / steps,
@@ -930,7 +964,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
         lastSampleY = follow.y;
       }
 
-      while (trail.length > 56) trail.shift();
+      while (trail.length > TRAIL_MAX) trail.shift();
     } else if (trail.length) {
       // collapse fast once motion stops so it does not linger behind the cursor
       trail.splice(0, Math.max(3, Math.ceil(trail.length * 0.28)));
@@ -1015,7 +1049,7 @@ if (bgCanvas && fxCanvas && !reducedMotion) {
     if (!document.hidden) {
       drawField();
       fxCtx.clearRect(0, 0, width, height);
-      if (finePointer) drawTrail();
+      drawTrail();
       drawSparks();
     }
     requestAnimationFrame(render);
