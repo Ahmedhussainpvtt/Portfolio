@@ -141,8 +141,8 @@ main,
 }
 
 .logo img {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   display: block;
   object-fit: cover;
 }
@@ -884,6 +884,12 @@ main,
   .leadership-grid,
   .explore-grid {
     grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 761px) {
+    .achievement-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .stats {
