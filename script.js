@@ -5,17 +5,34 @@ const year = document.getElementById("year");
 const form = document.getElementById("contact-form");
 const statusEl = document.getElementById("form-status");
 const submitBtn = document.getElementById("contact-submit");
+const backToTop = document.getElementById("back-to-top");
+const backToTopFooter = document.getElementById("back-to-top-footer");
 
 const CONTACT_EMAIL = "mahhussain123@gmail.com";
 
 year.textContent = new Date().getFullYear();
 
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+};
+
 const onScroll = () => {
   header.classList.toggle("scrolled", window.scrollY > 12);
+  const showTop = window.scrollY > 480;
+  backToTop.hidden = !showTop;
 };
 
 onScroll();
 window.addEventListener("scroll", onScroll, { passive: true });
+
+backToTop.addEventListener("click", scrollToTop);
+backToTopFooter.addEventListener("click", scrollToTop);
+
+document.querySelector(".logo")?.addEventListener("click", (event) => {
+  event.preventDefault();
+  scrollToTop();
+});
 
 toggle.addEventListener("click", () => {
   const expanded = toggle.getAttribute("aria-expanded") === "true";
