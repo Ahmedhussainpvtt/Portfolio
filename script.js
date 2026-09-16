@@ -6,7 +6,7 @@ const form = document.getElementById("contact-form");
 const statusEl = document.getElementById("form-status");
 const submitBtn = document.getElementById("contact-submit");
 
-const CONTACT_EMAIL = "alex@bluespacetech.com";
+const CONTACT_EMAIL = "mahhussain123@gmail.com";
 
 year.textContent = new Date().getFullYear();
 
