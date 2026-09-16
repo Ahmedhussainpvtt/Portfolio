@@ -169,6 +169,138 @@ document.querySelector(".logo")?.addEventListener("click", (event) => {
   scrollToTop();
 });
 
+/* Stretchy sticky back-to-top: follows the cursor, elongates, then snaps back. */
+if (finePointer && !reducedMotion && backToTop) {
+  const CATCH = 180; // start stretching within this radius
+  const SNAP = 140; // release once pulled this far from the home center
+  const MAX_FOLLOW = 92; // how far the blob can travel with the cursor
+  const MAX_STRETCH = 2.25; // full elongation along the pull axis
+
+  let pointerX = 0;
+  let pointerY = 0;
+  let pulling = false;
+  let stretchFrame = 0;
+  let current = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
+  let target = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
+
+  const applyStretch = () => {
+    backToTop.style.setProperty("--pull-x", `${current.x.toFixed(2)}px`);
+    backToTop.style.setProperty("--pull-y", `${current.y.toFixed(2)}px`);
+    backToTop.style.setProperty("--stretch", current.stretch.toFixed(3));
+    backToTop.style.setProperty("--squash", current.squash.toFixed(3));
+    backToTop.style.setProperty("--tilt", `${current.tilt.toFixed(2)}deg`);
+  };
+
+  const resetTarget = () => {
+    target = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
+  };
+
+  const tickStretch = () => {
+    const ease = pulling ? 0.22 : 0.28;
+    current.x += (target.x - current.x) * ease;
+    current.y += (target.y - current.y) * ease;
+    current.stretch += (target.stretch - current.stretch) * ease;
+    current.squash += (target.squash - current.squash) * ease;
+    current.tilt += (target.tilt - current.tilt) * ease;
+    applyStretch();
+
+    const settled =
+      Math.abs(current.x) < 0.15 &&
+      Math.abs(current.y) < 0.15 &&
+      Math.abs(current.stretch - 1) < 0.005 &&
+      !pulling;
+
+    if (settled) {
+      current = { x: 0, y: 0, stretch: 1, squash: 1, tilt: 0 };
+      applyStretch();
+      backToTop.classList.remove("is-stretching", "is-snapping");
+      stretchFrame = 0;
+      return;
+    }
+
+    stretchFrame = requestAnimationFrame(tickStretch);
+  };
+
+  const startStretchLoop = () => {
+    if (!stretchFrame) stretchFrame = requestAnimationFrame(tickStretch);
+  };
+
+  const updatePullFromPointer = () => {
+    if (!backToTop.classList.contains("is-stuck")) {
+      if (pulling) {
+        pulling = false;
+        resetTarget();
+        backToTop.classList.remove("is-stretching");
+        backToTop.classList.add("is-snapping");
+        startStretchLoop();
+      }
+      return;
+    }
+
+    const rect = backToTop.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = pointerX - cx;
+    const dy = pointerY - cy;
+    const dist = Math.hypot(dx, dy) || 0.0001;
+
+    if (dist > CATCH && !pulling) return;
+
+    if (dist > SNAP) {
+      if (pulling) {
+        pulling = false;
+        resetTarget();
+        backToTop.classList.remove("is-stretching");
+        backToTop.classList.add("is-snapping");
+        startStretchLoop();
+      }
+      return;
+    }
+
+    pulling = true;
+    backToTop.classList.add("is-stretching");
+    backToTop.classList.remove("is-snapping");
+
+    const t = Math.min(dist / SNAP, 1);
+    // ease-out so the last stretch feels stronger / "fully stretched"
+    const eased = 1 - Math.pow(1 - t, 2.4);
+    const follow = Math.min(dist, MAX_FOLLOW) * (0.55 + eased * 0.35);
+    const nx = dx / dist;
+    const ny = dy / dist;
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+    target.x = nx * follow;
+    target.y = ny * follow;
+    target.stretch = 1 + eased * (MAX_STRETCH - 1);
+    target.squash = 1 - eased * 0.42;
+    target.tilt = angle;
+    startStretchLoop();
+  };
+
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      updatePullFromPointer();
+    },
+    { passive: true }
+  );
+
+  window.addEventListener("pointerleave", () => {
+    if (!pulling) return;
+    pulling = false;
+    resetTarget();
+    backToTop.classList.remove("is-stretching");
+    backToTop.classList.add("is-snapping");
+    startStretchLoop();
+  });
+
+  backToTop.addEventListener("pointerleave", () => {
+    // keep stretching while still inside the catch radius; snap only if already far
+  });
+}
+
 /* ---------- navigation ---------- */
 
 toggle.addEventListener("click", () => {
