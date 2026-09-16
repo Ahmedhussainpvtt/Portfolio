@@ -283,6 +283,29 @@ document.querySelectorAll("[data-ripple]").forEach((el) => {
   });
 });
 
+/* Capability rows open on hover, so the button is here for taps and keyboards.
+   Where hover does not exist the rows stay open, matching the stylesheet. */
+const capabilityToggles = document.querySelectorAll(".capability-toggle");
+
+if (capabilityToggles.length) {
+  const alwaysOpen = !window.matchMedia("(hover: hover)").matches;
+
+  capabilityToggles.forEach((toggle) => {
+    const row = toggle.closest("li");
+
+    if (alwaysOpen) {
+      row.classList.add("is-open");
+      toggle.setAttribute("aria-expanded", "true");
+      return;
+    }
+
+    toggle.addEventListener("click", () => {
+      const isOpen = row.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  });
+}
+
 if (finePointer && !reducedMotion && cursorGlow) {
   let targetX = window.innerWidth / 2;
   let targetY = window.innerHeight / 2;

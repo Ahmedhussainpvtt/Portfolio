@@ -1327,6 +1327,146 @@ main,
   font-weight: 300;
 }
 
+/* ---------- capabilities ---------- */
+
+.capability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.capability-intro {
+  position: sticky;
+  top: 130px;
+}
+
+.capability-lede {
+  margin-top: 1.3rem;
+  max-width: 32ch;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.capability-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+}
+
+.capability-list > li {
+  border-top: 1px solid var(--line);
+  border-radius: 14px;
+  transition: background 0.4s ease;
+}
+
+.capability-list > li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.capability-head {
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+.capability-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.9rem 1fr 1.4rem;
+  align-items: baseline;
+  gap: 0.9rem;
+  padding: 1.45rem 1rem 1.45rem 0.9rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.capability-num {
+  font-size: 0.85rem;
+  font-family: "Outfit", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+
+.capability-name {
+  font-size: clamp(1.4rem, 2.3vw, 2.05rem);
+  line-height: 1.12;
+  transition: transform 0.45s var(--ease), color 0.35s ease;
+}
+
+.capability-arrow {
+  width: 19px;
+  height: 19px;
+  align-self: center;
+  color: var(--teal);
+  opacity: 0;
+  transform: translate3d(-8px, 8px, 0);
+  transition: opacity 0.35s ease, transform 0.45s var(--ease);
+}
+
+/* collapsed to a zero-height grid row, so it expands to whatever the copy needs */
+.capability-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.45s var(--ease), opacity 0.3s ease;
+}
+
+/* padding waits until the row opens: it survives the clip and would otherwise
+   leave every collapsed row carrying invisible height */
+.capability-body > p {
+  overflow: hidden;
+  max-width: 54ch;
+  padding: 0 1.5rem 0 4.7rem;
+  color: var(--ink-soft);
+  font-weight: 300;
+  transition: padding-bottom 0.45s var(--ease);
+}
+
+.capability-list > li:hover,
+.capability-list > li:focus-within,
+.capability-list > li.is-open {
+  background: rgba(15, 108, 133, 0.05);
+}
+
+.capability-list > li:hover .capability-body,
+.capability-list > li:focus-within .capability-body,
+.capability-list > li.is-open .capability-body {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.capability-list > li:hover .capability-body > p,
+.capability-list > li:focus-within .capability-body > p,
+.capability-list > li.is-open .capability-body > p {
+  padding-bottom: 1.5rem;
+}
+
+.capability-list > li:hover .capability-name,
+.capability-list > li:focus-within .capability-name,
+.capability-list > li.is-open .capability-name {
+  transform: translate3d(6px, 0, 0);
+  color: var(--teal);
+}
+
+.capability-list > li:hover .capability-num,
+.capability-list > li:focus-within .capability-num,
+.capability-list > li.is-open .capability-num {
+  color: var(--amber);
+}
+
+.capability-list > li:hover .capability-arrow,
+.capability-list > li:focus-within .capability-arrow,
+.capability-list > li.is-open .capability-arrow {
+  opacity: 1;
+  transform: none;
+}
+
 /* ---------- pitch ---------- */
 
 .pitch-panel {
@@ -1899,6 +2039,26 @@ html.js [data-tilt].is-visible {
 
 /* ---------- responsive ---------- */
 
+/* nothing to hover on a touch screen, so every row reads as open */
+@media (hover: none) {
+  .capability-body {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .capability-body > p {
+    padding-bottom: 1.5rem;
+  }
+
+  .capability-arrow {
+    display: none;
+  }
+
+  .capability-toggle {
+    cursor: default;
+  }
+}
+
 @media (max-width: 980px) {
   .hero,
   .about-grid,
@@ -1956,6 +2116,19 @@ html.js [data-tilt].is-visible {
 
   .approach-steps li {
     grid-template-columns: 56px 1fr;
+  }
+
+  .capability-layout {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  .capability-intro {
+    position: static;
+  }
+
+  .capability-lede {
+    max-width: 52ch;
   }
 
   .nav-toggle {
