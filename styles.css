@@ -2194,9 +2194,9 @@ html.js [data-tilt].is-visible {
   opacity: 0;
   pointer-events: none;
   background: radial-gradient(
-    280px circle at var(--sx, 50%) var(--sy, 50%),
-    rgba(var(--teal-rgb), 0.08),
-    transparent 62%
+    240px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(var(--teal-rgb), 0.045),
+    transparent 68%
   );
   transition: opacity 0.35s ease;
 }
@@ -2208,9 +2208,9 @@ html.js [data-tilt].is-visible {
 .contact-panel [data-spotlight]::after,
 .pitch-panel::after {
   background: radial-gradient(
-    300px circle at var(--sx, 50%) var(--sy, 50%),
-    rgba(var(--teal-rgb), 0.1),
-    transparent 62%
+    260px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(var(--teal-rgb), 0.06),
+    transparent 68%
   );
 }
 
