@@ -365,19 +365,17 @@ ol {
   box-shadow: 0 0 12px rgba(var(--teal-rgb), 0.4);
 }
 
-/* Fast-travel overlay: speed streaks while in-page nav flies to a section */
+/* Wormhole jump: the page is fully covered so this reads as a portal, not streaks. */
 .travel {
   position: fixed;
   inset: 0;
-  z-index: 38;
+  z-index: 52;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
   overflow: hidden;
-  background:
-    linear-gradient(to right, rgba(11, 18, 32, 0.42), transparent 14%, transparent 86%, rgba(11, 18, 32, 0.42)),
-    linear-gradient(to bottom, rgba(11, 18, 32, 0.18), transparent 22%, transparent 78%, rgba(11, 18, 32, 0.32));
-  transition: opacity 0.18s ease, visibility 0.18s ease;
+  background: #050810;
+  transition: opacity 0.16s ease, visibility 0.16s ease;
 }
 
 html.is-traveling .travel {
@@ -386,66 +384,146 @@ html.is-traveling .travel {
   pointer-events: auto;
 }
 
-.travel-lines {
+html.is-arriving .travel {
+  opacity: 0;
+  transition: opacity 0.38s var(--ease);
+}
+
+.travel::after {
+  content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 200%;
-  top: -50%;
+  inset: 0;
+  background: radial-gradient(circle, #fff 0%, rgba(56, 189, 248, 0.55) 28%, transparent 62%);
+  opacity: 0;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
 }
 
-.travel-lines-a {
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 28px,
-    rgba(var(--teal-rgb), 0.16) 28px 29px,
-    transparent 29px 64px
-  );
-  animation: travel-rush 0.32s linear infinite;
+html.is-arriving .travel::after {
+  animation: travel-flash 0.42s ease-out;
 }
 
-.travel-lines-b {
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 46px,
-    rgba(255, 255, 255, 0.12) 46px 48px,
-    transparent 48px 110px
-  );
-  animation: travel-rush 0.18s linear infinite;
-}
-
-html.is-travel-up .travel-lines-a,
-html.is-travel-up .travel-lines-b {
-  animation-direction: reverse;
-}
-
-@keyframes travel-rush {
-  to {
-    transform: translate3d(0, -110px, 0);
+@keyframes travel-flash {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
-.travel-label {
+.travel-fx {
   position: absolute;
-  left: 50%;
-  bottom: 11%;
-  margin: 0;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--teal);
-  text-shadow: 0 0 18px rgba(var(--teal-rgb), 0.45);
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-html.is-traveling main {
-  filter: blur(1.2px) saturate(1.08);
-  transform: scale(0.992);
-  transition: filter 0.2s ease, transform 0.4s var(--ease);
+.travel-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 48%,
+    transparent 12%,
+    rgba(5, 8, 16, 0.35) 48%,
+    #050810 100%
+  );
+  pointer-events: none;
+}
+
+.travel-core {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  width: 18vmin;
+  height: 18vmin;
+  margin: -9vmin 0 0 -9vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 8%, rgba(56, 189, 248, 0.7) 28%, transparent 68%);
+  filter: blur(2px);
+  opacity: 0.9;
+  animation: travel-core 0.9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes travel-core {
+  from {
+    transform: scale(0.82);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+.travel-hud {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  width: min(520px, 86vw);
+  text-align: center;
+  pointer-events: none;
+}
+
+.travel-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.travel-label {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.2rem, 6vw, 4.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #f4f8fc;
+  text-shadow: 0 0 40px rgba(56, 189, 248, 0.45);
+}
+
+html.is-traveling .travel-kicker {
+  animation: travel-kicker-in 0.45s var(--ease) both;
+}
+
+html.is-traveling .travel-label {
+  animation: travel-title-in 0.55s var(--ease) 0.06s both;
+}
+
+@keyframes travel-kicker-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.7em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.34em;
+  }
+}
+
+@keyframes travel-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+html.is-traveling main,
+html.is-traveling .site-header {
+  filter: blur(8px) brightness(0.35);
 }
 
 .site-header,

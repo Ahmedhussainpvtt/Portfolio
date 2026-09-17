@@ -145,7 +145,7 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/png" href="assets/favicon.png?v=2" />
-    <link rel="stylesheet" href="styles.css?v=20260916h" />
+    <link rel="stylesheet" href="styles.css?v=20260916l" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -176,9 +176,13 @@
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
     <canvas class="fx-canvas fx-front" id="cursor-fx" aria-hidden="true"></canvas>
     <div class="travel" id="travel" aria-hidden="true">
-      <span class="travel-lines travel-lines-a"></span>
-      <span class="travel-lines travel-lines-b"></span>
-      <p class="travel-label" id="travel-label"></p>
+      <canvas class="travel-fx" id="travel-fx"></canvas>
+      <div class="travel-vignette" aria-hidden="true"></div>
+      <div class="travel-core" aria-hidden="true"></div>
+      <div class="travel-hud">
+        <p class="travel-kicker" id="travel-kicker">Jumping to</p>
+        <p class="travel-label" id="travel-label"></p>
+      </div>
     </div>
 
     <header class="site-header" id="top">
@@ -1146,6 +1150,6 @@
     </button>
 
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
-    <script src="script.js?v=20260916j"></script>
+    <script src="script.js?v=20260916l"></script>
   </body>
 </html>
