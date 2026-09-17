@@ -50,7 +50,6 @@ Responsibilities include product demos and discovery, onboarding and go-live, ac
 ## Contact
 
 - Website: https://ahmedhussain.in/
-- Email: mahhussain123@gmail.com
-- Phone: +91 93811 07468
+- Email: ahmedhussainpvt@gmail.com
 - LinkedIn: https://www.linkedin.com/in/ahmedhussainpvt/
 - Resume: https://ahmedhussain.in/Ahmed%20Resume.pdf

@@ -27,7 +27,7 @@ const cursorGlow = document.getElementById("cursor-glow");
 const rotator = document.getElementById("rotator");
 const availabilityBadge = document.getElementById("availability-badge");
 
-const CONTACT_EMAIL = "mahhussain123@gmail.com";
+const CONTACT_EMAIL = "ahmedhussainpvt@gmail.com";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
