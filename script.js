@@ -327,20 +327,35 @@ const endTravel = (token) => {
   warp.stop();
 };
 
-const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
-  const destY =
-    target === 0 || target === document.getElementById("top")
-      ? 0
-      : Math.max(
-          0,
-          Math.round(
-            (typeof target === "number"
-              ? target
-              : target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset)) - HEADER_OFFSET
-          )
-        );
+const currentScrollY = () =>
+  lenis ? lenis.scroll : window.scrollY || window.pageYOffset || 0;
 
-  const startY = window.scrollY || window.pageYOffset || 0;
+const travelAnchor = (target) => {
+  if (!target || target === 0) return null;
+  if (typeof target === "number") return null;
+  if (target.id === "top") return target;
+  return (
+    target.querySelector(".section-heading") ||
+    target.querySelector(".eyebrow") ||
+    target.querySelector("h2") ||
+    target
+  );
+};
+
+const destFromTarget = (target) => {
+  if (target === 0 || (target && target.id === "top")) return 0;
+  if (typeof target === "number") return Math.max(0, Math.round(target));
+  const anchor = travelAnchor(target);
+  if (!anchor) return 0;
+  return Math.max(
+    0,
+    Math.round(currentScrollY() + anchor.getBoundingClientRect().top - HEADER_OFFSET)
+  );
+};
+
+const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
+  const destY = destFromTarget(target);
+  const startY = currentScrollY();
   const dist = destY - startY;
 
   if (hash === "#top" || hash === "") {
@@ -371,7 +386,7 @@ const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
 
   const driveWarp = () => {
     if (token !== travelGuard || !traveling) return;
-    const y = window.scrollY || window.pageYOffset || 0;
+    const y = currentScrollY();
     const done = dist === 0 ? 1 : Math.min(Math.abs(y - startY) / Math.abs(dist), 1);
     warp.setProgress(done);
     requestAnimationFrame(driveWarp);
