@@ -11,7 +11,7 @@
    Leave it empty and the form works without a captcha.
    ======================================================================= */
 const OPEN_TO_WORK = false;
-const RECAPTCHA_SITE_KEY = "";
+const RECAPTCHA_SITE_KEY = "6LckuL8tAAAAAHqHqjlh3ou3rqLhkXhBhwpFsIvi";
 
 const header = document.querySelector(".site-header");
 const toggle = document.querySelector(".nav-toggle");
