@@ -4,8 +4,14 @@
    OPEN_TO_WORK: set to true when you are job hunting. It shows the
    "Open to new opportunities" badge above your name in the hero.
    Set it back to false to hide the badge again.
+
+   RECAPTCHA_SITE_KEY: Google reCAPTCHA v2 ("I'm not a robot") site key.
+   Create one at https://www.google.com/recaptcha/admin for ahmedhussain.in
+   (and localhost). Paste the site key here, never the secret key.
+   Leave it empty and the form works without a captcha.
    ======================================================================= */
 const OPEN_TO_WORK = false;
+const RECAPTCHA_SITE_KEY = "";
 
 const header = document.querySelector(".site-header");
 const toggle = document.querySelector(".nav-toggle");
@@ -1311,6 +1317,49 @@ if (rotator && !reducedMotion) {
 /* ---------- contact form ---------- */
 
 const btnLabel = submitBtn.querySelector(".btn-label");
+const recaptchaWrap = document.getElementById("recaptcha-wrap");
+let recaptchaWidgetId = null;
+let recaptchaReady = Promise.resolve();
+
+const loadRecaptcha = () => {
+  if (!RECAPTCHA_SITE_KEY || !recaptchaWrap) return Promise.resolve();
+
+  recaptchaWrap.hidden = false;
+
+  if (window.grecaptcha?.render) {
+    recaptchaWidgetId = window.grecaptcha.render("recaptcha", {
+      sitekey: RECAPTCHA_SITE_KEY,
+      theme: "dark",
+    });
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    window.onRecaptchaLoad = () => {
+      try {
+        recaptchaWidgetId = window.grecaptcha.render("recaptcha", {
+          sitekey: RECAPTCHA_SITE_KEY,
+          theme: "dark",
+        });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    const script = document.createElement("script");
+    script.src =
+      "https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => reject(new Error("reCAPTCHA failed to load"));
+    document.head.appendChild(script);
+  });
+};
+
+if (form && RECAPTCHA_SITE_KEY) {
+  recaptchaReady = loadRecaptcha();
+}
 
 const setStatus = (message, type = "") => {
   statusEl.textContent = message;
@@ -1351,6 +1400,22 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  let recaptchaToken = "";
+  if (RECAPTCHA_SITE_KEY) {
+    try {
+      await recaptchaReady;
+    } catch (error) {
+      setStatus("Could not load the spam check. Refresh and try again.", "error");
+      return;
+    }
+
+    recaptchaToken = window.grecaptcha?.getResponse(recaptchaWidgetId) || "";
+    if (!recaptchaToken) {
+      setStatus("Tick the I'm not a robot box, then send.", "error");
+      return;
+    }
+  }
+
   submitBtn.disabled = true;
   setButtonState("loading");
   setStatus("Sending your message...", "");
@@ -1369,6 +1434,7 @@ form.addEventListener("submit", async (event) => {
         _subject: `Portfolio inquiry from ${name}`,
         _template: "table",
         _captcha: "false",
+        "g-recaptcha-response": recaptchaToken,
       }),
     });
 
@@ -1377,6 +1443,9 @@ form.addEventListener("submit", async (event) => {
     }
 
     form.reset();
+    if (RECAPTCHA_SITE_KEY && window.grecaptcha && recaptchaWidgetId !== null) {
+      window.grecaptcha.reset(recaptchaWidgetId);
+    }
     setButtonState("sent");
     celebrate();
     setStatus(

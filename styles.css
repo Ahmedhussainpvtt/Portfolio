@@ -2161,6 +2161,14 @@ html.js .section.is-seamed::before {
   grid-column: 1 / -1;
 }
 
+.recaptcha-wrap {
+  min-height: 78px;
+}
+
+.recaptcha-wrap[hidden] {
+  display: none;
+}
+
 .contact-form input,
 .contact-form textarea {
   width: 100%;
