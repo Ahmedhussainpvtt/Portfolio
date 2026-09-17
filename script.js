@@ -124,19 +124,112 @@ if (!reducedMotion && prefersFineDesktop && typeof Lenis === "function") {
     requestAnimationFrame(raf);
   };
   requestAnimationFrame(raf);
-
-  // keep in-page anchors silky with Lenis instead of native jump
-  document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const id = link.getAttribute("href");
-      if (!id || id === "#") return;
-      const target = document.querySelector(id);
-      if (!target) return;
-      event.preventDefault();
-      lenis.scrollTo(target, { offset: -88, duration: 1.15 });
-    });
-  });
 }
+
+/* Fast travel: header (and other in-page) links rush down the page instead
+   of a slow ease. Overlay streaks make the jump read as motion, not a cut. */
+const travelEl = document.getElementById("travel");
+const travelLabel = document.getElementById("travel-label");
+const HEADER_OFFSET = 88;
+let traveling = false;
+let travelGuard = 0;
+
+const warpEase = (t) => {
+  if (t < 0.5) return 16 * t * t * t * t * t;
+  return 1 - Math.pow(-2 * t + 2, 5) / 2;
+};
+
+const travelLabelFrom = (link, id) => {
+  if (id === "#top") return "";
+  const named = link.getAttribute("aria-label");
+  if (named) return named.replace(/\s+/g, " ").trim();
+  return (link.textContent || "").replace(/\s+/g, " ").trim();
+};
+
+const endTravel = (token) => {
+  if (token !== travelGuard) return;
+  traveling = false;
+  document.documentElement.classList.remove("is-traveling", "is-travel-up");
+  if (travelEl) travelEl.setAttribute("aria-hidden", "true");
+};
+
+const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
+  const destY =
+    target === 0 || target === document.getElementById("top")
+      ? 0
+      : Math.max(
+          0,
+          Math.round(
+            (typeof target === "number"
+              ? target
+              : target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset)) - HEADER_OFFSET
+          )
+        );
+
+  const startY = window.scrollY || window.pageYOffset || 0;
+  const dist = destY - startY;
+
+  if (hash === "#top" || hash === "") {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  } else if (hash) {
+    history.pushState(null, "", hash);
+  }
+
+  if (reducedMotion || Math.abs(dist) < 12) {
+    if (lenis) lenis.scrollTo(destY, { immediate: true });
+    else window.scrollTo(0, destY);
+    requestScrollUpdate();
+    return;
+  }
+
+  traveling = true;
+  const token = (travelGuard += 1);
+  document.documentElement.classList.add("is-traveling");
+  document.documentElement.classList.toggle("is-travel-up", dist < 0);
+  if (travelLabel) travelLabel.textContent = label;
+  if (travelEl) travelEl.setAttribute("aria-hidden", "false");
+
+  const duration = Math.min(680, Math.max(360, Math.abs(dist) * 0.07));
+
+  const finish = () => {
+    requestScrollUpdate();
+    endTravel(token);
+  };
+
+  if (lenis) {
+    lenis.scrollTo(destY, {
+      duration: duration / 1000,
+      easing: warpEase,
+      lock: true,
+      onComplete: finish,
+    });
+  } else {
+    const t0 = performance.now();
+    const step = (now) => {
+      if (token !== travelGuard) return;
+      const t = Math.min(1, (now - t0) / duration);
+      window.scrollTo(0, startY + dist * warpEase(t));
+      if (t < 1) requestAnimationFrame(step);
+      else finish();
+    };
+    requestAnimationFrame(step);
+  }
+
+  // belt: if the scroller never calls back, drop the overlay anyway
+  setTimeout(() => endTravel(token), duration + 280);
+};
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+  const id = link.getAttribute("href");
+  if (!id || id.length < 2) return;
+  const target = document.querySelector(id);
+  if (!target) return;
+  event.preventDefault();
+  if (traveling) return;
+  fastTravelTo(target, { label: travelLabelFrom(link, id), hash: id });
+});
 
 /* Always land at the top on refresh / restore (not on intentional #hash clicks). */
 const jumpToTopNow = () => {
@@ -162,21 +255,12 @@ window.addEventListener("pageshow", (event) => {
 });
 
 const scrollToTop = () => {
-  if (lenis) {
-    lenis.scrollTo(0, { duration: 1.1 });
-  } else {
-    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
-  }
-  history.replaceState(null, "", window.location.pathname + window.location.search);
+  if (traveling) return;
+  fastTravelTo(document.getElementById("top") || 0, { label: "", hash: "#top" });
 };
 
 backToTop.addEventListener("click", scrollToTop);
 backToTopFooter.addEventListener("click", scrollToTop);
-
-document.querySelector(".logo")?.addEventListener("click", (event) => {
-  event.preventDefault();
-  scrollToTop();
-});
 
 /* Stretchy pull for CTAs: the button follows the cursor and elongates toward it,
    then snaps home once pulled past BREAK. Back-to-top stays a normal button. */

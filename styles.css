@@ -365,6 +365,89 @@ ol {
   box-shadow: 0 0 12px rgba(var(--teal-rgb), 0.4);
 }
 
+/* Fast-travel overlay: speed streaks while in-page nav flies to a section */
+.travel {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, rgba(11, 18, 32, 0.42), transparent 14%, transparent 86%, rgba(11, 18, 32, 0.42)),
+    linear-gradient(to bottom, rgba(11, 18, 32, 0.18), transparent 22%, transparent 78%, rgba(11, 18, 32, 0.32));
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+html.is-traveling .travel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.travel-lines {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 200%;
+  top: -50%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+}
+
+.travel-lines-a {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 28px,
+    rgba(var(--teal-rgb), 0.16) 28px 29px,
+    transparent 29px 64px
+  );
+  animation: travel-rush 0.32s linear infinite;
+}
+
+.travel-lines-b {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 46px,
+    rgba(255, 255, 255, 0.12) 46px 48px,
+    transparent 48px 110px
+  );
+  animation: travel-rush 0.18s linear infinite;
+}
+
+html.is-travel-up .travel-lines-a,
+html.is-travel-up .travel-lines-b {
+  animation-direction: reverse;
+}
+
+@keyframes travel-rush {
+  to {
+    transform: translate3d(0, -110px, 0);
+  }
+}
+
+.travel-label {
+  position: absolute;
+  left: 50%;
+  bottom: 11%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--teal);
+  text-shadow: 0 0 18px rgba(var(--teal-rgb), 0.45);
+}
+
+html.is-traveling main {
+  filter: blur(1.2px) saturate(1.08);
+  transform: scale(0.992);
+  transition: filter 0.2s ease, transform 0.4s var(--ease);
+}
+
 .site-header,
 main,
 .site-footer {
@@ -2841,6 +2924,11 @@ html.js [data-tilt].is-visible {
 
   .deco {
     animation: none;
+  }
+
+  .travel,
+  html.is-traveling .travel {
+    display: none;
   }
 
   .cursor-glow,
