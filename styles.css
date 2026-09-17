@@ -2379,8 +2379,9 @@ html.js .section.is-seamed::before {
 }
 
 .contact-form button:disabled {
-  opacity: 0.7;
-  cursor: wait;
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ---------- footer and back to top ---------- */

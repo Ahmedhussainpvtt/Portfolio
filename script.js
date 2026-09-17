@@ -557,6 +557,7 @@ if (finePointer && !reducedMotion) {
     let nearest = null;
     let nearestDist = Infinity;
     buttons.forEach((el) => {
+      if (el.disabled) return;
       const rect = el.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return;
       const { x, y } = centerOf(el, active.get(el));
@@ -1573,27 +1574,53 @@ const btnLabel = submitBtn.querySelector(".btn-label");
 const recaptchaWrap = document.getElementById("recaptcha-wrap");
 let recaptchaWidgetId = null;
 let recaptchaReady = Promise.resolve();
+let recaptchaVerified = false;
+
+const syncSubmitGate = () => {
+  if (!submitBtn) return;
+  if (!RECAPTCHA_SITE_KEY) {
+    submitBtn.disabled = submitBtn.classList.contains("is-loading");
+    return;
+  }
+  submitBtn.disabled =
+    !recaptchaVerified || submitBtn.classList.contains("is-loading");
+};
+
+const renderRecaptcha = () => {
+  recaptchaWidgetId = window.grecaptcha.render("recaptcha", {
+    sitekey: RECAPTCHA_SITE_KEY,
+    theme: "dark",
+    callback: () => {
+      recaptchaVerified = true;
+      syncSubmitGate();
+    },
+    "expired-callback": () => {
+      recaptchaVerified = false;
+      syncSubmitGate();
+    },
+    "error-callback": () => {
+      recaptchaVerified = false;
+      syncSubmitGate();
+    },
+  });
+};
 
 const loadRecaptcha = () => {
   if (!RECAPTCHA_SITE_KEY || !recaptchaWrap) return Promise.resolve();
 
   recaptchaWrap.hidden = false;
+  recaptchaVerified = false;
+  syncSubmitGate();
 
   if (window.grecaptcha?.render) {
-    recaptchaWidgetId = window.grecaptcha.render("recaptcha", {
-      sitekey: RECAPTCHA_SITE_KEY,
-      theme: "dark",
-    });
+    renderRecaptcha();
     return Promise.resolve();
   }
 
   return new Promise((resolve, reject) => {
     window.onRecaptchaLoad = () => {
       try {
-        recaptchaWidgetId = window.grecaptcha.render("recaptcha", {
-          sitekey: RECAPTCHA_SITE_KEY,
-          theme: "dark",
-        });
+        renderRecaptcha();
         resolve();
       } catch (error) {
         reject(error);
@@ -1611,6 +1638,7 @@ const loadRecaptcha = () => {
 };
 
 if (form && RECAPTCHA_SITE_KEY) {
+  submitBtn.disabled = true;
   recaptchaReady = loadRecaptcha();
 }
 
@@ -1653,7 +1681,6 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  let recaptchaToken = "";
   if (RECAPTCHA_SITE_KEY) {
     try {
       await recaptchaReady;
@@ -1662,9 +1689,10 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    recaptchaToken = window.grecaptcha?.getResponse(recaptchaWidgetId) || "";
-    if (!recaptchaToken) {
+    const token = window.grecaptcha?.getResponse(recaptchaWidgetId) || "";
+    if (!token || !recaptchaVerified) {
       setStatus("Tick the I'm not a robot box, then send.", "error");
+      syncSubmitGate();
       return;
     }
   }
@@ -1687,7 +1715,6 @@ form.addEventListener("submit", async (event) => {
         _subject: `${name} - New messages on Ahmed Porfolio`,
         _template: "table",
         _captcha: "false",
-        "g-recaptcha-response": recaptchaToken,
       }),
     });
 
@@ -1698,6 +1725,7 @@ form.addEventListener("submit", async (event) => {
     form.reset();
     if (RECAPTCHA_SITE_KEY && window.grecaptcha && recaptchaWidgetId !== null) {
       window.grecaptcha.reset(recaptchaWidgetId);
+      recaptchaVerified = false;
     }
     setButtonState("sent");
     celebrate();
@@ -1705,7 +1733,10 @@ form.addEventListener("submit", async (event) => {
       "Message sent. Thanks for reaching out. I will get back to you soon.",
       "success"
     );
-    setTimeout(() => setButtonState("idle"), 3200);
+    setTimeout(() => {
+      setButtonState("idle");
+      syncSubmitGate();
+    }, 3200);
   } catch (error) {
     setButtonState("idle");
     const subject = encodeURIComponent(
@@ -1720,6 +1751,6 @@ form.addEventListener("submit", async (event) => {
     );
     window.location.href = mailto;
   } finally {
-    submitBtn.disabled = false;
+    syncSubmitGate();
   }
 });
