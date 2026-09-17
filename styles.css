@@ -1784,12 +1784,8 @@ html.js .section.is-seamed::before {
   margin-top: 1rem;
   padding: clamp(2rem, 4vw, 3.2rem);
   border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: linear-gradient(
-    120deg,
-    color-mix(in srgb, var(--bg-deep) 92%, #000),
-    color-mix(in srgb, var(--teal) 16%, var(--bg-deep))
-  );
+  border: 1px solid rgba(var(--teal-rgb), 0.28);
+  background: #10192b;
   box-shadow: var(--shadow);
   text-align: center;
 }
@@ -1798,6 +1794,10 @@ html.js .section.is-seamed::before {
   font-size: clamp(1.9rem, 3.4vw, 3rem);
   max-width: 24ch;
   margin: 0 auto;
+  color: #f4f8fc;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
 }
 
 .pitch-panel p {
@@ -2279,16 +2279,25 @@ html.js .section.is-seamed::before {
 }
 
 .footer-link {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-soft);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color 0.25s ease, border-color 0.25s ease;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  background: rgba(var(--ink-rgb), 0.04);
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
 .footer-link:hover,
 .footer-link:focus-visible {
-  color: var(--teal);
-  border-bottom-color: rgba(var(--teal-rgb), 0.5);
+  color: var(--ink);
+  border-color: rgba(var(--teal-rgb), 0.55);
+  background: rgba(var(--teal-rgb), 0.12);
 }
 
 .back-to-top-link {
@@ -2407,6 +2416,12 @@ html.js .section-heading h2.is-split.is-visible {
   transform: none !important;
   filter: none !important;
   will-change: auto;
+  /* drop the parent gradient mask: it paints a second copy of the first word
+     above the clipped spans while they rise into place */
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--ink);
 }
 
 html.js .section-heading h2.is-split .rise {
