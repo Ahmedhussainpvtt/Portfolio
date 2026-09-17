@@ -136,6 +136,9 @@
       document.documentElement.classList.remove("no-js");
       document.documentElement.classList.add("js");
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      if (/index\.html$/i.test(location.pathname)) {
+        history.replaceState(null, "", "/" + (location.search || ""));
+      }
       window.scrollTo(0, 0);
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -187,7 +190,7 @@
 
     <header class="site-header" id="top">
       <div class="nav-wrap">
-        <a class="logo" href="#top" aria-label="Ahmed Hussain home">
+        <a class="logo" href="/" aria-label="Ahmed Hussain home">
           <img src="assets/logo.png" alt="AH logo" width="52" height="52" />
         </a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
@@ -1130,8 +1133,8 @@
     <footer class="site-footer">
       <p>© <span id="year"></span> Mohammed Ahmed Hussain. All rights reserved.</p>
       <div class="footer-links">
-        <a class="footer-link" href="terms.html">Terms</a>
-        <a class="footer-link" href="privacy.html">Privacy</a>
+        <a class="footer-link" href="/terms">Terms</a>
+        <a class="footer-link" href="/privacy">Privacy</a>
         <button type="button" class="back-to-top-link" id="back-to-top-footer">
           Back to top
         </button>
@@ -1150,6 +1153,6 @@
     </button>
 
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
-    <script src="script.js?v=20260916m"></script>
+    <script src="script.js?v=20260916n"></script>
   </body>
 </html>

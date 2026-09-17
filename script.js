@@ -358,11 +358,7 @@ const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
   const startY = currentScrollY();
   const dist = destY - startY;
 
-  if (hash === "#top" || hash === "") {
-    history.replaceState(null, "", window.location.pathname + window.location.search);
-  } else if (hash) {
-    history.pushState(null, "", hash);
-  }
+  history.replaceState(null, "", "/");
 
   if (reducedMotion || Math.abs(dist) < 12) {
     if (lenis) lenis.scrollTo(destY, { immediate: true });
@@ -424,15 +420,28 @@ const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
 };
 
 document.addEventListener("click", (event) => {
-  const link = event.target.closest('a[href^="#"]');
+  const link = event.target.closest("a[href]");
   if (!link) return;
-  const id = link.getAttribute("href");
-  if (!id || id.length < 2) return;
-  const target = document.querySelector(id);
+
+  const href = link.getAttribute("href");
+  if (!href) return;
+
+  const onHome =
+    location.pathname === "/" || /\/index\.html$/i.test(location.pathname);
+
+  if ((href === "/" || href === "/index.html") && onHome) {
+    event.preventDefault();
+    if (traveling) return;
+    fastTravelTo(document.getElementById("top") || 0, { label: "", hash: "#top" });
+    return;
+  }
+
+  if (!href.startsWith("#") || href.length < 2) return;
+  const target = document.querySelector(href);
   if (!target) return;
   event.preventDefault();
   if (traveling) return;
-  fastTravelTo(target, { label: travelLabelFrom(link, id), hash: id });
+  fastTravelTo(target, { label: travelLabelFrom(link, href), hash: href });
 });
 
 /* Always land at the top on refresh / restore (not on intentional #hash clicks). */
@@ -448,8 +457,8 @@ const jumpToTopNow = () => {
 const navEntry = performance.getEntriesByType?.("navigation")?.[0];
 const isReload = navEntry?.type === "reload";
 
-if (isReload && location.hash) {
-  history.replaceState(null, "", location.pathname + location.search);
+if (isReload) {
+  history.replaceState(null, "", "/");
 }
 
 jumpToTopNow();
