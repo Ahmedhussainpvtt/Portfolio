@@ -544,29 +544,59 @@ if (finePointer && !reducedMotion) {
     if (!frame) frame = requestAnimationFrame(tick);
   };
 
+  const BLOCKER =
+    "a, button, input, textarea, select, label, iframe, .g-recaptcha, [role='checkbox'], [role='button'], p, h1, h2, h3, h4, h5, h6, li, .eyebrow, .section-heading, .form-status, .legal";
+
+  const centerOf = (el, entry) => {
+    if (entry?.pulling) return { x: entry.originX, y: entry.originY };
+    const rect = el.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  };
+
+  const findNearest = () => {
+    let nearest = null;
+    let nearestDist = Infinity;
+    buttons.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+      const { x, y } = centerOf(el, active.get(el));
+      const dist = Math.hypot(pointerX - x, pointerY - y);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = el;
+      }
+    });
+    return { nearest, nearestDist };
+  };
+
+  const peekUnder = (ignoreEl) => {
+    const prev = ignoreEl.style.pointerEvents;
+    ignoreEl.style.pointerEvents = "none";
+    const hit = document.elementFromPoint(pointerX, pointerY);
+    ignoreEl.style.pointerEvents = prev;
+    return hit;
+  };
+
   const updateFromPointer = () => {
-    // only one CTA stretches at a time: the closest within CATCH, or the
-    // one already being pulled
     let pullingEl = null;
     active.forEach((entry, el) => {
       if (entry.pulling) pullingEl = el;
     });
 
-    let nearest = null;
-    let nearestDist = Infinity;
+    const { nearest, nearestDist } = findNearest();
+
+    // Another CTA is closer → drop the current one and hand off.
+    if (
+      pullingEl &&
+      nearest &&
+      nearest !== pullingEl &&
+      nearestDist <= CATCH
+    ) {
+      release(pullingEl, active.get(pullingEl));
+      pullingEl = null;
+    }
 
     if (!pullingEl) {
-      buttons.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.width < 2 || rect.height < 2) return;
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dist = Math.hypot(pointerX - cx, pointerY - cy);
-        if (dist < nearestDist) {
-          nearestDist = dist;
-          nearest = el;
-        }
-      });
       if (!nearest || nearestDist > CATCH) {
         active.forEach((entry, el) => {
           if (!entry.pulling) active.delete(el);
@@ -607,6 +637,22 @@ if (finePointer && !reducedMotion) {
         baseSize: Math.max(rect.width, rect.height),
       };
       active.set(el, entry);
+    }
+
+    // Peek under the stretched button: any other control or text → snap home.
+    if (entry.pulling) {
+      const hit = peekUnder(el);
+      if (hit && !el.contains(hit)) {
+        const otherBtn = hit.closest(".btn, .nav-cta");
+        if (otherBtn && otherBtn !== el) {
+          release(el, entry);
+          return;
+        }
+        if (hit.closest(BLOCKER)) {
+          release(el, entry);
+          return;
+        }
+      }
     }
 
     if (dist > reachLimit) {
@@ -1638,7 +1684,7 @@ form.addEventListener("submit", async (event) => {
         name,
         email,
         message,
-        _subject: `Portfolio inquiry from ${name}`,
+        _subject: `${name} - New messages on Ahmed Porfolio`,
         _template: "table",
         _captcha: "false",
         "g-recaptcha-response": recaptchaToken,
@@ -1662,7 +1708,9 @@ form.addEventListener("submit", async (event) => {
     setTimeout(() => setButtonState("idle"), 3200);
   } catch (error) {
     setButtonState("idle");
-    const subject = encodeURIComponent(`Portfolio inquiry from ${name}`);
+    const subject = encodeURIComponent(
+      `${name} - New messages on Ahmed Porfolio`
+    );
     const body = encodeURIComponent(`${message}\n\n-\n${name}\n${email}`);
     const mailto = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
 
