@@ -16,7 +16,7 @@
     <title>Privacy Policy | Ahmed Hussain</title>
     <meta
       name="description"
-      content="Privacy policy for ahmedhussain.in. Google Analytics measures site use. The contact form is used only to reply."
+      content="Privacy policy for ahmedhussain.in. Google Analytics and Amplitude measure site use, including session replay. The contact form is used only to reply."
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ahmedhussain.in/privacy" />
@@ -32,6 +32,14 @@
       if (/\/privacy\.html$/i.test(location.pathname)) {
         history.replaceState(null, "", "/privacy" + (location.search || ""));
       }
+    </script>
+    <script src="https://cdn.amplitude.com/script/274fb630382921c242c2f06b17bbec72.js"></script>
+    <script>
+      window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+      window.amplitude.init("274fb630382921c242c2f06b17bbec72", {
+        fetchRemoteConfig: true,
+        autocapture: true,
+      });
     </script>
   </head>
   <body class="legal-page">
@@ -51,9 +59,10 @@
 
       <h2>Data Collection</h2>
       <p>
-        This site uses Google Analytics to see which pages are visited, along
-        with device and approximate location. That data is not sold. There is
-        no advertising.
+        This site uses Google Analytics and Amplitude to see which pages are
+        visited, along with device and approximate location. Amplitude also
+        records session replays of how the page is used. That data is not sold.
+        There is no advertising.
       </p>
 
       <h2>If you contact me</h2>

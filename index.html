@@ -158,6 +158,14 @@
     />
     <link rel="icon" type="image/png" href="assets/favicon.png?v=2" />
     <link rel="stylesheet" href="styles.css?v=20260917b" />
+    <script src="https://cdn.amplitude.com/script/274fb630382921c242c2f06b17bbec72.js"></script>
+    <script>
+      window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+      window.amplitude.init("274fb630382921c242c2f06b17bbec72", {
+        fetchRemoteConfig: true,
+        autocapture: true,
+      });
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

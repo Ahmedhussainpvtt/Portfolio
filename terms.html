@@ -33,6 +33,14 @@
         history.replaceState(null, "", "/terms" + (location.search || ""));
       }
     </script>
+    <script src="https://cdn.amplitude.com/script/274fb630382921c242c2f06b17bbec72.js"></script>
+    <script>
+      window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+      window.amplitude.init("274fb630382921c242c2f06b17bbec72", {
+        fetchRemoteConfig: true,
+        autocapture: true,
+      });
+    </script>
   </head>
   <body class="legal-page">
     <header class="site-header">
