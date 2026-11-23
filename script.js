@@ -132,184 +132,17 @@ if (!reducedMotion && prefersFineDesktop && typeof Lenis === "function") {
   requestAnimationFrame(raf);
 }
 
-/* Fast travel: a full wormhole jump. The page is covered so this reads as a
-   portal, not speed lines over the content. */
+/* Section jump: soft wash + label, then a short smooth scroll. No looping FX. */
 const travelEl = document.getElementById("travel");
 const travelLabel = document.getElementById("travel-label");
 const travelKicker = document.getElementById("travel-kicker");
-const warpCanvas = document.getElementById("travel-fx");
 const HEADER_OFFSET = 88;
 let traveling = false;
 let travelGuard = 0;
 
-const warp = (() => {
-  if (!warpCanvas) return { start() {}, stop() {}, setProgress() {} };
-
-  const ctx = warpCanvas.getContext("2d");
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const GATE_COUNT = 16;
-  const SPARK_COUNT = window.innerWidth < 760 ? 70 : 130;
-  const NEAR = 48;
-  const FAR = 920;
-  const DEPTH = FAR - NEAR;
-
-  let w = 0;
-  let h = 0;
-  let cx = 0;
-  let cy = 0;
-  let frame = null;
-  let cam = 0;
-  let spin = 0;
-  let speed = 18;
-  let dir = 1;
-  let gates = [];
-  let sparks = [];
-  let accent = { teal: [56, 189, 248], amber: [103, 232, 249] };
-
-  const readAccent = () => {
-    const s = getComputedStyle(document.documentElement);
-    const parse = (name, fallback) => {
-      const raw = s.getPropertyValue(name).trim();
-      if (!raw) return fallback;
-      const parts = raw.split(",").map((n) => Number(n.trim()));
-      return parts.length === 3 && parts.every((n) => !Number.isNaN(n)) ? parts : fallback;
-    };
-    accent = {
-      teal: parse("--teal-rgb", [56, 189, 248]),
-      amber: parse("--amber-rgb", [103, 232, 249]),
-    };
-  };
-
-  const resize = () => {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    cx = w / 2;
-    cy = h * 0.48;
-    warpCanvas.width = Math.round(w * dpr);
-    warpCanvas.height = Math.round(h * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-
-  const wrapZ = (z) => {
-    const t = ((z - NEAR) % DEPTH + DEPTH) % DEPTH;
-    return NEAR + t;
-  };
-
-  const seed = () => {
-    gates = Array.from({ length: GATE_COUNT }, (_, i) => ({
-      z: NEAR + (i / GATE_COUNT) * DEPTH,
-      rot: (i * Math.PI) / 9,
-    }));
-    sparks = Array.from({ length: SPARK_COUNT }, () => ({
-      a: Math.random() * Math.PI * 2,
-      z: NEAR + Math.random() * DEPTH,
-      orbit: 70 + Math.random() * 220,
-      size: 0.6 + Math.random() * 1.6,
-      warm: Math.random() > 0.72,
-    }));
-  };
-
-  const project = (z) => 280 / Math.max(z, 28);
-
-  const hex = (x, y, r, rot) => {
-    ctx.beginPath();
-    for (let i = 0; i < 6; i += 1) {
-      const a = rot + (i * Math.PI) / 3;
-      const px = x + Math.cos(a) * r;
-      const py = y + Math.sin(a) * r;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-  };
-
-  const draw = () => {
-    ctx.fillStyle = "#050810";
-    ctx.fillRect(0, 0, w, h);
-
-    cam += speed * dir;
-    spin += 0.012 * dir;
-
-    const [tr, tg, tb] = accent.teal;
-    const [ar, ag, ab] = accent.amber;
-
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(spin * 0.35);
-    ctx.globalCompositeOperation = "lighter";
-
-    gates.forEach((gate, i) => {
-      const z = wrapZ(gate.z - cam);
-      const scale = project(z);
-      const r = 210 * scale;
-      const depth = 1 - (z - NEAR) / DEPTH;
-      const alpha = 0.08 + depth * 0.55;
-      const rot = gate.rot + spin;
-
-      hex(0, 0, r, rot);
-      ctx.strokeStyle = `rgba(${tr}, ${tg}, ${tb}, ${alpha})`;
-      ctx.lineWidth = 1.2 + depth * 2.4;
-      ctx.stroke();
-
-      if (i % 2 === 0) {
-        ctx.beginPath();
-        ctx.arc(0, 0, r * 0.72, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.28})`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-    });
-
-    sparks.forEach((spark) => {
-      spark.z = wrapZ(spark.z - speed * 1.6 * dir);
-      const scale = project(spark.z);
-      const x = Math.cos(spark.a + spin * 0.4) * spark.orbit * scale;
-      const y = Math.sin(spark.a + spin * 0.4) * spark.orbit * scale;
-      const depth = 1 - (spark.z - NEAR) / DEPTH;
-      const radius = spark.size * scale * 7;
-      const [r, g, b] = spark.warm ? [ar, ag, ab] : [tr, tg, tb];
-
-      ctx.beginPath();
-      ctx.arc(x, y, Math.max(radius, 0.4), 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.2 + depth * 0.85})`;
-      ctx.fill();
-    });
-
-    ctx.restore();
-    ctx.globalCompositeOperation = "source-over";
-    frame = requestAnimationFrame(draw);
-  };
-
-  window.addEventListener("resize", () => {
-    if (frame) resize();
-  });
-
-  return {
-    start(direction) {
-      dir = direction < 0 ? -1 : 1;
-      speed = 10;
-      cam = 0;
-      spin = 0;
-      readAccent();
-      resize();
-      seed();
-      if (!frame) frame = requestAnimationFrame(draw);
-    },
-    setProgress(t) {
-      const cruise = t < 0.5 ? t * 2 : (1 - t) * 2;
-      speed = 8 + cruise * 42;
-    },
-    stop() {
-      if (frame) cancelAnimationFrame(frame);
-      frame = null;
-      ctx.clearRect(0, 0, w, h);
-    },
-  };
-})();
-
-const warpEase = (t) => {
-  if (t < 0.5) return 16 * t * t * t * t * t;
-  return 1 - Math.pow(-2 * t + 2, 5) / 2;
+const travelEase = (t) => {
+  // smooth ease-in-out cubic — calm, not dramatic
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
 
 const travelLabelFrom = (link, id) => {
@@ -322,9 +155,12 @@ const travelLabelFrom = (link, id) => {
 const endTravel = (token) => {
   if (token !== travelGuard) return;
   traveling = false;
-  document.documentElement.classList.remove("is-traveling", "is-travel-up", "is-arriving");
+  document.documentElement.classList.remove(
+    "is-traveling",
+    "is-travel-up",
+    "is-arriving"
+  );
   if (travelEl) travelEl.setAttribute("aria-hidden", "true");
-  warp.stop();
 };
 
 const currentScrollY = () =>
@@ -349,7 +185,9 @@ const destFromTarget = (target) => {
   if (!anchor) return 0;
   return Math.max(
     0,
-    Math.round(currentScrollY() + anchor.getBoundingClientRect().top - HEADER_OFFSET)
+    Math.round(
+      currentScrollY() + anchor.getBoundingClientRect().top - HEADER_OFFSET
+    )
   );
 };
 
@@ -372,35 +210,25 @@ const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
   document.documentElement.classList.add("is-traveling");
   document.documentElement.classList.toggle("is-travel-up", dist < 0);
   document.documentElement.classList.remove("is-arriving");
-  if (travelKicker) travelKicker.textContent = hash === "#top" ? "Returning" : "Jumping to";
+  if (travelKicker) {
+    travelKicker.textContent = hash === "#top" ? "Back to" : "Going to";
+  }
   if (travelLabel) travelLabel.textContent = label;
   if (travelEl) travelEl.setAttribute("aria-hidden", "false");
 
-  const duration = Math.min(1100, Math.max(720, Math.abs(dist) * 0.09));
-
-  warp.start(dist < 0 ? -1 : 1);
-
-  const driveWarp = () => {
-    if (token !== travelGuard || !traveling) return;
-    const y = currentScrollY();
-    const done = dist === 0 ? 1 : Math.min(Math.abs(y - startY) / Math.abs(dist), 1);
-    warp.setProgress(done);
-    requestAnimationFrame(driveWarp);
-  };
-
-  requestAnimationFrame(driveWarp);
+  const duration = Math.min(720, Math.max(420, Math.abs(dist) * 0.055));
 
   const finish = () => {
+    if (token !== travelGuard) return;
     document.documentElement.classList.add("is-arriving");
     requestScrollUpdate();
-    if (typeof burstAt === "function") burstAt(window.innerWidth / 2, window.innerHeight * 0.48);
-    setTimeout(() => endTravel(token), 380);
+    setTimeout(() => endTravel(token), 240);
   };
 
   if (lenis) {
     lenis.scrollTo(destY, {
       duration: duration / 1000,
-      easing: warpEase,
+      easing: travelEase,
       lock: true,
       onComplete: finish,
     });
@@ -409,14 +237,14 @@ const fastTravelTo = (target, { label = "", hash = "" } = {}) => {
     const step = (now) => {
       if (token !== travelGuard) return;
       const t = Math.min(1, (now - t0) / duration);
-      window.scrollTo(0, startY + dist * warpEase(t));
+      window.scrollTo(0, startY + dist * travelEase(t));
       if (t < 1) requestAnimationFrame(step);
       else finish();
     };
     requestAnimationFrame(step);
   }
 
-  setTimeout(() => endTravel(token), duration + 520);
+  setTimeout(() => endTravel(token), duration + 360);
 };
 
 document.addEventListener("click", (event) => {
