@@ -1,51 +1,47 @@
 # Mohammed Ahmed Hussain
 
-**Product Sales & Operations | AI & Automation | SaaS**  
+**Sales Manager | AI & SaaS Solutions**  
 Hyderabad, Telangana, India
 
 ## Summary
 
-Product Sales & Operations professional with 5+ years across technology sales, AI solutions, SaaS, customer success, business operations, and process improvement.
+Sales and operations professional with 6+ years of experience spanning technology sales, AI/SaaS product sales, technical staffing, client relationships, and team coordination.
 
-Work sits between business and technology: partnering with leadership, customers, sales teams, and product/technical teams to demonstrate solutions, improve products, streamline operations, and turn complex workflows into practical systems.
+Experienced in managing sales conversations from prospecting and discovery through product demos, onboarding, and ongoing customer support. Combines consultative selling with practical knowledge of AI voice solutions, CRM and outreach tools, workflow automation, and cross-functional execution.
 
-Hands-on across AI agents, automation, SaaS products, customer onboarding, product testing, sales operations, team training, and cross-functional execution.
+## Core competencies
 
-## What I bring
+B2B sales & business development · Full sales-cycle management · Product demonstrations & discovery · Lead generation & outbound outreach · Pipeline & account management · Customer onboarding & retention · Sales team coaching & coordination · Negotiation & vendor relationships · AI/SaaS solution positioning · Cross-functional collaboration · Sales reporting & KPI tracking · Technical staffing & recruitment
 
-- **Revenue mindset** — positioning, demos, selling, and adoption
-- **Product thinking** — customer needs into product improvements
-- **AI & automation** — efficient workflows with AI and integrations
-- **Operational execution** — processes, documentation, scalable systems
-- **Leadership & collaboration** — across sales, product, technical, and customer teams
+## Tools & technical exposure
 
-## Selected work themes
+- **CRM & outreach:** HubSpot, Smartlead, Instantly, Clay, Apify
+- **AI & telephony:** AI voice agents, Twilio, ElevenLabs, PlayHT
+- **Automation:** Make.com, Zapier, n8n
+- **Productivity:** Google Workspace, Microsoft Office
+- **Web & cloud:** WordPress, Webflow, Google Cloud Platform (GCP), AWS
 
-1. AI SaaS product operations (ContactSwing AI)
-2. Sales & revenue operations
-3. Business automation
-4. Customer onboarding & implementation
+## Experience
 
-## Skills
+### Product Sales Manager (Core Sales) — ContactSwing AI
+Hyderabad, India · Jan 2024 – Present
 
-### Product & revenue
-Product sales, SaaS sales, solution selling, product demonstrations, customer success, revenue operations, CRM & HubSpot, outbound strategy
+Manage sales for an AI voice-agent platform across prospecting, discovery, demos, onboarding, and customer relationships. Position solutions for staffing, real estate, and healthcare. Coordinate go-live setup, test AI voice/telephony workflows, and partner with leadership, product, engineering, and support.
 
-### AI & automation
-AI agents, voice AI, workflow automation, LLM applications, process automation, AI product testing, Zapier, AI voice workflows
+### Talent Acquisition Specialist — Blue Space Technologies
+Hyderabad, India · Aug 2022 – Jan 2024
 
-### Operations
-Customer onboarding, process improvement, SOP development, KPI management, team training, cross-functional operations
+End-to-end technical recruitment for Java, .NET, Python, DevOps, and product management. Built and coordinated a team of five recruiters/sourcers. Owned screening, interviews, offers, negotiations, W-2/C2C staffing categories, and reporting to leadership.
 
-### Technology
-CRM, APIs & integrations, AWS & GCP, automation platforms, product QA, business systems, Twilio & DNS, Google Workspace
+### Bench Sales Recruiter — Amvotech Solutions
+Hyderabad, India · Jan 2020 – May 2022
 
-## Current role
+Bench sales for IT consultants: vendor relationships, submissions, interview coordination, rate discussions, and placement follow-ups.
 
-**Product Sales & Operations Manager**  
-ContactSwing AI · Core Team · Jan 2024 – Present · Hyderabad
+## Education
 
-Responsibilities include product demos and discovery, onboarding and go-live, account management, outbound/sales support, AI product testing, translating customer feedback into product improvements, coordinating with product/technical teams, building automations, training sales teammates, and working with CEO / CTO / VP leadership.
+- Bachelor of Commerce (Computers) — International Degree College, Hyderabad
+- Intermediate – CEC — International Degree College, Hyderabad
 
 ## Contact
 

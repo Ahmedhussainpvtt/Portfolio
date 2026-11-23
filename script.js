@@ -1523,10 +1523,10 @@ if (heroPortrait && finePointer && !reducedMotion) {
 if (rotator && !reducedMotion) {
   const words = [
     "ContactSwing AI",
-    "AI Solutions",
-    "Automation",
-    "Customer Success",
-    "Team Enablement",
+    "AI SaaS Sales",
+    "Voice Agents",
+    "Product Demos",
+    "Customer Onboarding",
   ];
   const noise = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+=<>/";
   const SCRAMBLE_MS = 620;
